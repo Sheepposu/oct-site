@@ -66,7 +66,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     "debug_toolbar",
-    "tournament.apps.TournamentConfig"
+    "tournament.apps.TournamentConfig",
+    "achievements.apps.AchievementsConfig"
 ]
 
 REST_FRAMEWORK = {

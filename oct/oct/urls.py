@@ -20,5 +20,6 @@ handler500 = "tournament.views.error_500"
 
 urlpatterns = [
     path("", include("tournament.urls")),
+    path("achievements/", include("achievements.urls")),
     path("__debug__/", include("debug_toolbar.urls"))
 ]
