@@ -97,7 +97,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, "templates")
+            os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "frontend")
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -169,9 +170,7 @@ STATIC_URL = 'static/'
 if not DEBUG:
     STATIC_ROOT = BASE_DIR / 'staticfiles'
     STATIC_URL = 'staticfiles/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend", "dist")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -206,3 +205,12 @@ def show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": show_toolbar,
 }
+# Cookie settings for authentication
+CSRF_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_HTTPONLY = False  
+SESSION_COOKIE_HTTPONLY = True
+
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True

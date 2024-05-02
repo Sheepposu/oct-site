@@ -10,12 +10,14 @@ from django.http import (
 )
 from django.core.cache import cache
 from django.db import connection
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST
 
 from .serializers import *
 from common import render, get_auth_handler, log_err, parse_sql_row
 
 import requests
-import traceback
+import json
 from osu.path import Path
 
 
@@ -36,6 +38,47 @@ USER_DISPLAY_ORDER = [
 def error_500(request):
     return render(request, "tournament/error_500.html")
 
+# VIEWS FOR FRONTEND
+# fix these soon
+
+@require_POST
+def login_view(request):
+    data = json.loads(request.body)
+
+    try:
+        code = data.get('code')
+        if code is not None:
+            user = User.objects.create_user(code)
+            if user is None:
+                return JsonResponse({"status": "error", "message": "Failed to login"})
+            _login(request, user, backend=settings.AUTH_BACKEND)
+            return JsonResponse({"status": "success"})
+        
+    except requests.HTTPError as exc:
+        print(exc.response.text)
+        log_err(request, exc)
+        return HttpResponseBadRequest()
+    except Exception as exc:
+        print("what")
+        log_err(request, exc)
+    return HttpResponseServerError()
+
+
+def logout_view(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'detail': 'You\'re not logged in.'}, status=400)
+
+    logout(request)
+    return JsonResponse({'detail': 'Successfully logged out.'})
+
+
+@ensure_csrf_cookie
+def session_view(request):
+    print(request.user.is_authenticated)
+    if not request.user.is_authenticated:
+        return JsonResponse({'isAuthenticated': False})
+
+    return JsonResponse({'isAuthenticated': True})
 
 # TODO: maybe move caching logic to models
 def get_mappools(tournament: TournamentIteration):
