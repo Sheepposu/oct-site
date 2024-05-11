@@ -67,7 +67,8 @@ INSTALLED_APPS = [
     'rest_framework',
     "debug_toolbar",
     "tournament.apps.TournamentConfig",
-    "achievements.apps.AchievementsConfig"
+    "achievements.apps.AchievementsConfig",
+    'corsheaders'
 ]
 
 REST_FRAMEWORK = {
@@ -85,6 +86,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    'corsheaders.middleware.CorsMiddleware'
+]
+
+# Allow vite dev server to connect
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173'
 ]
 
 WHITENOISE_MIMETYPES = {

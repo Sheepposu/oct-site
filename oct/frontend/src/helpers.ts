@@ -1,16 +1,14 @@
+import { Session } from "./types/SessionType";
+
 export async function getSession() {
   try {
-    const res = await fetch("/api/session", {
+    const res = await fetch("http://localhost:8000/api/session/", {
       credentials: "same-origin",
     });
-    const data = await res.json();
-    console.log(data);
-    if (data.isAuthenticated) {
-      console.log("hi");
-      return true;
-    }
+
+    const data: Session = await res.json();
+    return data;
   } catch (err) {
     console.log(err);
   }
-  return false;
 }

@@ -12,6 +12,8 @@ from django.core.cache import cache
 from django.db import connection
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
+from django.contrib.sessions.backends.db import SessionStore
+from models import User as _User
 
 from .serializers import *
 from common import render, get_auth_handler, log_err, parse_sql_row
@@ -38,6 +40,11 @@ USER_DISPLAY_ORDER = [
 def error_500(request):
     return render(request, "tournament/error_500.html")
 
+def generate_roles_dict(roles):
+    role_list = list(map(lambda r: (r.name[0]+r.name[1:]).lower(), roles))
+    roles_dict = dict(map(lambda role: (role, role in role_list), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
+    return roles_dict
+
 # VIEWS FOR FRONTEND
 # fix these soon
 
@@ -48,9 +55,23 @@ def login_view(request):
     try:
         code = data.get('code')
         if code is not None:
-            user = User.objects.create_user(code)
+            user: _User = User.objects.create_user(code)
             if user is None:
                 return JsonResponse({"status": "error", "message": "Failed to login"})
+            
+            involvement = user.get_tournament_involvement(tournament_iteration=OCT5).first()
+            roles = sorted(involvement.roles.get_roles(), key=lambda r: USER_DISPLAY_ORDER.index(r)) \
+                if involvement is not None else None
+            sorted_roles = generate_roles_dict(roles)
+            
+            request.session["user"] = {
+                "osu_id": user.osu_id,
+                "osu_username": user.osu_username,
+                "osu_avatar": user.osu_avatar,
+                "osu_cover": user.osu_cover,
+                "roles": sorted_roles,
+            }
+
             _login(request, user, backend=settings.AUTH_BACKEND)
             return JsonResponse({"status": "success"})
         
@@ -59,7 +80,7 @@ def login_view(request):
         log_err(request, exc)
         return HttpResponseBadRequest()
     except Exception as exc:
-        print("what")
+        print(exc)
         log_err(request, exc)
     return HttpResponseServerError()
 
@@ -68,17 +89,19 @@ def logout_view(request):
     if not request.user.is_authenticated:
         return JsonResponse({'detail': 'You\'re not logged in.'}, status=400)
 
-    logout(request)
+    _logout(request)
+    request.session["user"] = None
     return JsonResponse({'detail': 'Successfully logged out.'})
 
 
 @ensure_csrf_cookie
 def session_view(request):
-    print(request.user.is_authenticated)
+    print(request.session.items())
     if not request.user.is_authenticated:
-        return JsonResponse({'isAuthenticated': False})
+        request.session["user"] = None
+        return JsonResponse({'isAuthenticated': False, 'user': request.session.get("user")})
 
-    return JsonResponse({'isAuthenticated': True})
+    return JsonResponse({'isAuthenticated': True, 'user': request.session.get("user")})
 
 # TODO: maybe move caching logic to models
 def get_mappools(tournament: TournamentIteration):

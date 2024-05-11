@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { redirect, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
@@ -8,13 +8,9 @@ export default function Login() {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
 
-  console.log(queryParams.get("code"));
-  console.log(cookies.get("csrftoken"));
-
   function isResponseOk(response: Response) {
     if (response.status >= 200 && response.status <= 299) {
       return response.text().then((text) => {
-        console.log(text);
         return JSON.parse(text);
       });
     } else {
@@ -33,9 +29,8 @@ export default function Login() {
       body: JSON.stringify({ code: queryParams.get("code") }),
     })
       .then((resp) => isResponseOk(resp))
-      .then((data) => {
-        console.log(data);
-        return redirect("../");
+      .then(() => {
+        window.location.replace("/");
       });
   });
   return <div>Logging in....</div>;
