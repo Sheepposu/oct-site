@@ -12,11 +12,21 @@ export default defineConfig(({ command }) => {
     return {
       plugins: [react()],
       base: "/",
+      resolve: {
+        alias: {
+          src: "/src",
+        },
+      },
     };
   } else {
     return {
       plugins: [react()],
       base: "/static/",
+      resolve: {
+        alias: {
+          src: "/src",
+        },
+      },
     };
   }
 });

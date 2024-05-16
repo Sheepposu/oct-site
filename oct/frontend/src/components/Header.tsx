@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { UserSessionContext } from "../UserSessionProvider";
 import { Link } from "react-router-dom";
 
-import osuLogo from "../assets/images/osu.png";
+import osuLogo from "src/assets/images/osu.png";
 
 export default function Header() {
   const { session, loading } = useContext(UserSessionContext);
@@ -13,7 +13,7 @@ export default function Header() {
         className="w-40 h-24 flex justify-center items-center text-white"
       >
         <div className="w-40 h-24 flex justify-center items-center text-white">
-          <p className="text-center font-extrabold italic text-5xl">OCT5</p>
+          <p className="text-center font-extrabold italic text-6xl">OCT</p>
         </div>
       </Link>
       <Link
@@ -35,7 +35,7 @@ export default function Header() {
       <div className="flex-1"></div>
       <div>
         {loading ? (
-          <div className="w-40 h-12 flex items-center justify-center text-white rounded-full bg-[#9f9f9f] shadow-xl">
+          <div className="w-40 h-12 flex items-center justify-center text-white rounded-full bg-[#9f9f9f] shadow-xl select-none hover:cursor-not-allowed">
             <p className="pr-1 text-center whitespace-nowrap w-[calc(100%-5px)] text-black flex items-center justify-center italic">
               Loading...
             </p>

@@ -13,13 +13,14 @@ from django.db import connection
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 from django.contrib.sessions.backends.db import SessionStore
-from models import User as _User
+from rest_framework.renderers import JSONRenderer
 
 from .serializers import *
 from common import render, get_auth_handler, log_err, parse_sql_row
 
 import requests
 import json
+import time
 from osu.path import Path
 
 
@@ -40,13 +41,14 @@ USER_DISPLAY_ORDER = [
 def error_500(request):
     return render(request, "tournament/error_500.html")
 
-def generate_roles_dict(roles):
+def generate_roles_dict(roles, testing=False):
     role_list = list(map(lambda r: (r.name[0]+r.name[1:]).lower(), roles))
-    roles_dict = dict(map(lambda role: (role, role in role_list), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
-    return roles_dict
 
-# VIEWS FOR FRONTEND
-# fix these soon
+    if testing == True:
+        return dict(map(lambda role: (role, True), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
+    return dict(map(lambda role: (role, role in role_list), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
+
+# Login endpoints
 
 @require_POST
 def login_view(request):
@@ -55,14 +57,14 @@ def login_view(request):
     try:
         code = data.get('code')
         if code is not None:
-            user: _User = User.objects.create_user(code)
+            user = User.objects.create_user(code)
             if user is None:
                 return JsonResponse({"status": "error", "message": "Failed to login"})
             
             involvement = user.get_tournament_involvement(tournament_iteration=OCT5).first()
             roles = sorted(involvement.roles.get_roles(), key=lambda r: USER_DISPLAY_ORDER.index(r)) \
                 if involvement is not None else None
-            sorted_roles = generate_roles_dict(roles)
+            sorted_roles = generate_roles_dict(roles, True) # erm make sure to set this back to false
             
             request.session["user"] = {
                 "osu_id": user.osu_id,
@@ -96,7 +98,6 @@ def logout_view(request):
 
 @ensure_csrf_cookie
 def session_view(request):
-    print(request.session.items())
     if not request.user.is_authenticated:
         request.session["user"] = None
         return JsonResponse({'isAuthenticated': False, 'user': request.session.get("user")})
@@ -243,37 +244,42 @@ def logout(req):
 
 
 def dashboard(req):
+    t1 = time.time()
     if not req.user.is_authenticated:
-        return redirect("index")
+        return HttpResponse(status=401)
     involvement = req.user.get_tournament_involvement(tournament_iteration=OCT5).first()
-    roles = sorted(involvement.roles.get_roles(), key=lambda r: USER_DISPLAY_ORDER.index(r)) \
-        if involvement is not None else None
-    formatted_roles = ", ".join(map(lambda r: r.name[0]+r.name[1:].replace("_", " ").lower(), roles)) \
-        if roles else "No Roles"
-
     context = {
-        "is_registered": involvement is not None and UserRoles.REGISTERED_PLAYER in involvement.roles,
-        "roles": formatted_roles
+        "is_registered": involvement is not None and req.session["user"]["roles"]["registered_player"],
     }
+
     player = StaticPlayer.objects.select_related("team").filter(
         user=req.user,
         team__bracket__tournament_iteration=OCT5
     ).first()
     
-    matches = []
+    _matches = []
     if player is not None:
-        matches += list(map(
+        _matches += list(map(
             lambda m: map_match_object(m, player),
             player.team.tournamentmatch_set.prefetch_related("teams").select_related("tournament_round__bracket").all()
         ))
     if involvement is not None and UserRoles.REFEREE in involvement.roles:
-        matches += list(filter(lambda m: m not in matches, map(
+        _matches += list(filter(lambda m: m not in _matches, map(
             map_match_object, 
             TournamentMatch.objects.filter(referee=req.user, tournament_round__bracket__tournament_iteration=OCT5)
         )))
-    context["matches"] = sorted(matches, key=lambda info: info["obj"])
 
-    return render(req, "tournament/dashboard.html", context)
+    matches = []
+    for match in _matches:
+        match.pop("obj")
+        matches.append(match)
+    
+    context["matches"] = matches # Removed the sorting, most likely will sort client side
+    print(matches)
+
+    t2 = time.time()
+    print(f"Elapsed time: {t2-t1}")
+    return JsonResponse({"response": context})
 
 
 def tournaments(req, name=None, section=None):
@@ -383,6 +389,7 @@ def map_match_object(match, player=None):
     match_info = {"obj": match}
     progress = match.get_progress()
     match_info["progress"] = progress
+    match_info["time_str"] = match.time_str
     if match.tournament_round.name != "QUALIFIERS":
         teams = match.teams.all()
         if match.team_order and teams:
@@ -412,6 +419,12 @@ def map_match_object(match, player=None):
         "DEFEAT": "#FF8A8A",
         "QUALIFIERS": "#AAAAAA" if progress == "UPCOMING" else "#8A8AFF",
     }[match_info["result"]]
+
+    for key, value in match_info.items():
+        if isinstance(value, TournamentTeam):
+            serializer = TournamentTeamSerializer(value)
+            match_info[key] = serializer.serialize(exclude=["staticplayer_set"])
+            
     return match_info
 
 
