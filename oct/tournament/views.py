@@ -428,7 +428,7 @@ def map_match_object(match, player=None):
 
         if isinstance(value, TournamentTeam):
             serializer = TournamentTeamSerializer(value)
-            match_info[key] = serializer.serialize(exclude=["staticplayer_set"])
+            match_info[key] = serializer.serialize()
             continue
             
     return match_info
