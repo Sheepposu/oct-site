@@ -1,7 +1,11 @@
 import { MatchType } from "src/types/MatchType";
 
 import osuLogo from "src/assets/images/osu.png";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Modal } from "@mui/material";
+import Box from "@mui/material/Box";
+import MatchPage from "./MatchPage";
+import { BsArrowUpRight, BsX } from "react-icons/bs";
 
 type MatchCardProps = {
   match: MatchType;
@@ -9,6 +13,10 @@ type MatchCardProps = {
 
 export default function MatchCard(props: MatchCardProps) {
   const match = props.match;
+
+  const [open, setOpen] = useState<boolean>(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   return (
     <div
@@ -39,7 +47,7 @@ export default function MatchCard(props: MatchCardProps) {
             ) : (
               <p className="[margin-block:auto] text-center">{match.score}</p>
             )}
-            {!match.team2 == undefined ? (
+            {!(match.team2 === undefined) ? (
               <>
                 <p className="[margin-block:auto] mr-1 text-right">
                   {match.team2?.name}
@@ -59,18 +67,52 @@ export default function MatchCard(props: MatchCardProps) {
           </div>
         </>
       )}
-      <Link to="/" className="w-12 h-12">
-        <svg
-          width="50px"
-          height="50px"
-          version="1.1"
-          viewBox="0 0 512 512"
-          xmlns="http://www.w3.org/2000/svg"
-          xmlnsXlink="http://www.w3.org/1999/xlink"
-        >
-          <polygon points="160,115.4 180.7,96 352,256 180.7,416 160,396.7 310.5,256 " />
-        </svg>
-      </Link>
+      <div>
+        <div onClick={handleOpen} className="hover:cursor-pointer">
+          <svg
+            width="50px"
+            height="50px"
+            version="1.1"
+            viewBox="0 0 512 512"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+          >
+            <polygon points="160,115.4 180.7,96 352,256 180.7,416 160,396.7 310.5,256 " />
+          </svg>
+        </div>
+        <div className="relative">
+          <Modal open={open} onClose={handleClose} closeAfterTransition>
+            <Box className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100vw_-_100px)] h-[calc(100vh_-_156px)] rounded-xl">
+              <div className="w-full h-14 flex rounded-xl bg-blue-300">
+                <div>
+                  {match.result == "QUALIFIERS" ? (
+                    <p className="mt-3 ml-3 font-bold text-xl h-full text-center">
+                      Qualifiers {match.id}
+                    </p>
+                  ) : (
+                    <p className="mt-3 ml-3 font-bold text-xl h-full text-center">
+                      Match {match.id}: {match.team1?.name} vs{" "}
+                      {match.team2?.name}
+                    </p>
+                  )}
+                </div>
+                <div className="flex flex-row-reverse flex-grow h-full">
+                  <div
+                    className="h-full flex items-center justify-center w-12 hover:cursor-pointer"
+                    onClick={handleClose}
+                  >
+                    <BsX className="w-6 h-6" />
+                  </div>
+                  <div className="h-full flex items-center justify-center w-12 hover:cursor-not-allowed">
+                    <BsArrowUpRight className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+              <MatchPage />
+            </Box>
+          </Modal>
+        </div>
+      </div>
     </div>
   );
 }

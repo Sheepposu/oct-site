@@ -271,7 +271,7 @@ def dashboard(req):
 
     matches = []
     for match in _matches:
-        match.pop("obj")
+        # match.pop("obj")
         matches.append(match)
     
     context["matches"] = matches # Removed the sorting, most likely will sort client side
@@ -421,9 +421,15 @@ def map_match_object(match, player=None):
     }[match_info["result"]]
 
     for key, value in match_info.items():
+        if isinstance(value, TournamentMatch):
+            serializer = TournamentMatchSerializer(value)
+            match_info[key] = serializer.serialize(exclude=["tournament_round"])
+            continue
+
         if isinstance(value, TournamentTeam):
             serializer = TournamentTeamSerializer(value)
             match_info[key] = serializer.serialize(exclude=["staticplayer_set"])
+            continue
             
     return match_info
 
