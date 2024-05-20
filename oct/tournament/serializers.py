@@ -53,7 +53,6 @@ class Serializer:
                     include.get(field)
                 )
             else:
-                # If the field is a property, it won't have a field_type
                 if field_type is None and hasattr(obj, field):
                     data[json_name] = getattr(obj, field)
                 elif isinstance(value, datetime):

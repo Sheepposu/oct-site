@@ -267,7 +267,7 @@ class TournamentMatch(models.Model):
 
     @property
     def time_str(self):
-        return self.starting_time.strftime("%m/%d %H:%M (%Z)") if self.starting_time else "Not scheduled"
+        return self.starting_time.isoformat()
 
     @property
     def winner(self):
