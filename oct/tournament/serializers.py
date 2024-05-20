@@ -34,9 +34,9 @@ class Serializer:
     def _transform(self, obj, fields, exclude, include):
         data = {}
         for field in fields:
-            field_type = getattr(self.model, field)
+            field_type = getattr(self.model, field, None)
             json_name = self.transforms[field] if field in self.transforms else field
-            value = getattr(obj, field)
+            value = getattr(obj, field, None)
             if value is None:
                 data[json_name] = None
                 continue
@@ -53,7 +53,13 @@ class Serializer:
                     include.get(field)
                 )
             else:
-                data[json_name] = value
+                # If the field is a property, it won't have a field_type
+                if field_type is None and hasattr(obj, field):
+                    data[json_name] = getattr(obj, field)
+                elif isinstance(value, datetime):
+                    data[json_name] = value.isoformat()
+                else:
+                    data[json_name] = value
         return data
 
     def _separate_field_args(self, fields):
@@ -150,10 +156,21 @@ class TournamentMatchSerializer:
         'referee',
         'streamer',
         'commentator1',
-        'commentator2'
+        'commentator2',
+        'time_str',
+        'winner',
+        'has_started',
+        'progress'
     ]
 
-
+    def _transform(self, obj, fields, exclude, include):
+        data = super()._transform(obj, fields, exclude, include)
+        # Adding custom method fields
+        if 'has_started' in fields:
+            data['has_started'] = obj.get_has_started()
+        if 'progress' in fields:
+            data['progress'] = obj.get_progress()
+        return data
 @serializer
 class TournamentRoundSerializer:
     model = TournamentRound

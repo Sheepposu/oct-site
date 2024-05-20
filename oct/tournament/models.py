@@ -267,19 +267,22 @@ class TournamentMatch(models.Model):
 
     @property
     def time_str(self):
-        return self.starting_time.strftime("%m/%d %H:%M (%Z)") \
-            if self.starting_time else "Not scheduled"
+        return self.starting_time.strftime("%m/%d %H:%M (%Z)") if self.starting_time else "Not scheduled"
 
     @property
     def winner(self):
         return round(self.wins.count("2")/len(self.wins)) if self.finished else None
         
     def get_has_started(self):
-        return datetime.now(tz=timezone.utc) > self.starting_time
+        return self.starting_time is not None and datetime.now(tz=timezone.utc) > self.starting_time
 
     def get_progress(self):
-        return "UPCOMING" if (self.starting_time is None or not self.get_has_started()) and not self.finished \
-                          else ("ONGOING" if not self.finished else "FINISHED")
+        if self.starting_time is None or not self.get_has_started():
+            return "UPCOMING"
+        elif not self.finished:
+            return "ONGOING"
+        else:
+            return "FINISHED"
 
     def get_match_info(self):
         if self.osu_match_id is None:
