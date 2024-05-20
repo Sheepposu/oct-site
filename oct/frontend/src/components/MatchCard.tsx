@@ -2,7 +2,7 @@ import { MatchType } from "src/types/MatchType";
 
 import osuLogo from "src/assets/images/osu.png";
 import { useState } from "react";
-import { Modal } from "@mui/material";
+import { Grow, Modal } from "@mui/material";
 import Box from "@mui/material/Box";
 import MatchPage from "./MatchPage";
 import { BsArrowUpRight, BsX } from "react-icons/bs";
@@ -83,32 +83,36 @@ export default function MatchCard(props: MatchCardProps) {
         <div className="relative">
           <Modal open={open} onClose={handleClose} closeAfterTransition>
             <Box className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100vw_-_100px)] h-[calc(100vh_-_156px)] rounded-xl">
-              <div className="w-full h-14 flex rounded-xl bg-blue-300">
-                <div>
-                  {match.result == "QUALIFIERS" ? (
-                    <p className="mt-3 ml-3 font-bold text-xl h-full text-center">
-                      Qualifiers {match.id}
-                    </p>
-                  ) : (
-                    <p className="mt-3 ml-3 font-bold text-xl h-full text-center">
-                      Match {match.id}: {match.team1?.name} vs{" "}
-                      {match.team2?.name}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-row-reverse flex-grow h-full">
-                  <div
-                    className="h-full flex items-center justify-center w-12 hover:cursor-pointer"
-                    onClick={handleClose}
-                  >
-                    <BsX className="w-6 h-6" />
+              <Grow in={open}>
+                <div className="h-full">
+                  <div className="w-full h-14 flex rounded-xl bg-blue-300">
+                    <div>
+                      {match.result == "QUALIFIERS" ? (
+                        <p className="mt-3 ml-3 font-bold text-xl h-full text-center">
+                          Qualifiers {match.id}
+                        </p>
+                      ) : (
+                        <p className="mt-3 ml-3 font-bold text-xl h-full text-center">
+                          Match {match.id}: {match.team1?.name} vs{" "}
+                          {match.team2?.name}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-row-reverse flex-grow h-full">
+                      <div
+                        className="h-full flex items-center justify-center w-12 hover:cursor-pointer"
+                        onClick={handleClose}
+                      >
+                        <BsX className="w-6 h-6" />
+                      </div>
+                      <div className="h-full flex items-center justify-center w-12 hover:cursor-not-allowed">
+                        <BsArrowUpRight className="w-6 h-6" />
+                      </div>
+                    </div>
                   </div>
-                  <div className="h-full flex items-center justify-center w-12 hover:cursor-not-allowed">
-                    <BsArrowUpRight className="w-6 h-6" />
-                  </div>
+                  <MatchPage />
                 </div>
-              </div>
-              <MatchPage />
+              </Grow>
             </Box>
           </Modal>
         </div>
