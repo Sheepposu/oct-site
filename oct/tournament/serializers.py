@@ -53,9 +53,7 @@ class Serializer:
                     include.get(field)
                 )
             else:
-                if field_type is None and hasattr(obj, field):
-                    data[json_name] = getattr(obj, field)
-                elif isinstance(value, datetime):
+                if isinstance(value, datetime):
                     data[json_name] = value.isoformat()
                 else:
                     data[json_name] = value
@@ -132,9 +130,6 @@ class TournamentTeamSerializer:
     model = TournamentTeam
     fields = ['id', 'name', 'icon', 'seed', 'players']
     excludes = ["players.team"]
-    transforms = {
-        "players": "players"
-    }
 
 
 @serializer
@@ -156,24 +151,14 @@ class TournamentMatchSerializer:
         'streamer',
         'commentator1',
         'commentator2',
-        'time_str',
         'winner',
+        'progress',
         'has_started',
-        'progress'
     ]
-
-    def _transform(self, obj, fields, exclude, include):
-        data = super()._transform(obj, fields, exclude, include)
-        # Adding custom method fields
-        if 'has_started' in fields:
-            data['has_started'] = obj.get_has_started()
-        if 'progress' in fields:
-            data['progress'] = obj.get_progress()
-        return data
 @serializer
 class TournamentRoundSerializer:
     model = TournamentRound
-    fields = ['bracket', 'name', 'full_name', 'start_date']
+    fields = ['name', 'full_name', 'start_date']
 
 
 @serializer

@@ -257,22 +257,33 @@ def dashboard(req):
         team__bracket__tournament_iteration=OCT5
     ).first()
     
-    _matches = []
-    if player is not None:
-        _matches += list(map(
-            lambda m: map_match_object(m, player),
-            player.team.tournamentmatch_set.prefetch_related("teams").select_related("tournament_round__bracket").all()
-        ))
-    if involvement is not None and UserRoles.REFEREE in involvement.roles:
-        _matches += list(filter(lambda m: m not in _matches, map(
-            map_match_object, 
-            TournamentMatch.objects.filter(referee=req.user, tournament_round__bracket__tournament_iteration=OCT5)
-        )))
+    # _matches = []
+    # if player is not None:
+    #     _matches += list(map(
+    #         lambda m: map_match_object(m, player),
+    #         player.team.tournamentmatch_set.prefetch_related("teams").select_related("tournament_round__bracket").all()
+    #     ))
+    # if involvement is not None and UserRoles.REFEREE in involvement.roles:
+    #     _matches += list(filter(lambda m: m not in _matches, map(
+    #         map_match_object, 
+    #         TournamentMatch.objects.filter(referee=req.user, tournament_round__bracket__tournament_iteration=OCT5)
+    #     )))
+
+    # matches = []
+    # for match in _matches:
+    #     match.pop("obj")
+    #     matches.append(match)
 
     matches = []
-    for match in _matches:
-        # match.pop("obj")
-        matches.append(match)
+    if player is not None:
+        matches += player.team.tournamentmatch_set.prefetch_related("teams").select_related("tournament_round__bracket").all()
+    if involvement is not None and UserRoles.REFEREE in involvement.roles:
+        matches += TournamentMatch.objects.filter(referee=req.user, tournament_round__bracket__tournament_iteration=OCT5)
+
+    match_serializer = TournamentMatchSerializer(matches, many=True)
+    serialized_matches = match_serializer.serialize(exclude=["tournament_round"])
+
+    return JsonResponse(serialized_matches, safe=False)
     
     context["matches"] = matches # Removed the sorting, most likely will sort client side
     print(matches)

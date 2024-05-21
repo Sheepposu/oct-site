@@ -264,25 +264,22 @@ class TournamentMatch(models.Model):
     streamer = models.ForeignKey(User, on_delete=models.RESTRICT, null=True, related_name="+")
     commentator1 = models.ForeignKey(User, on_delete=models.RESTRICT, null=True, related_name="+")
     commentator2 = models.ForeignKey(User, on_delete=models.RESTRICT, null=True, related_name="+")
-
-    @property
-    def time_str(self):
-        return self.starting_time.isoformat()
-
+    
     @property
     def winner(self):
         return round(self.wins.count("2")/len(self.wins)) if self.finished else None
-        
-    def get_has_started(self):
+    
+    @property
+    def has_started(self):
         return self.starting_time is not None and datetime.now(tz=timezone.utc) > self.starting_time
 
-    def get_progress(self):
-        if self.starting_time is None or not self.get_has_started():
+    @property
+    def progress(self):
+        if self.starting_time is None or not self.has_started:
             return "UPCOMING"
         elif not self.finished:
             return "ONGOING"
-        else:
-            return "FINISHED"
+        return "FINISHED"
 
     def get_match_info(self):
         if self.osu_match_id is None:
