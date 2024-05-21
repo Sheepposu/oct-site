@@ -41,7 +41,8 @@ USER_DISPLAY_ORDER = [
 ]
 
 def generate_roles_dict(roles):
-    return dict(map(lambda r: (r.name.lower(), r in roles), USER_DISPLAY_ORDER))
+    role_list = list(map(lambda r: (r.name[0]+r.name[1:]).lower(), roles))
+    return dict(map(lambda role: (role, role in role_list), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
 
 
 OSU_CLIENT: Client = settings.OSU_CLIENT
@@ -143,7 +144,10 @@ class User(AbstractBaseUser):
     @property
     def user_roles(self):
         involvement = self.get_tournament_involvement(tournament_iteration=TournamentIteration.objects.get(name="OCT5")).first()
-        return generate_roles_dict(involvement.roles.get_roles())
+        sorted_roles = generate_roles_dict(involvement.roles.get_roles())
+        print(involvement.roles.get_roles())
+        print(sorted_roles)
+        return sorted_roles
 
     def get_auth_handler(self):
         auth: AuthHandler = get_auth_handler()

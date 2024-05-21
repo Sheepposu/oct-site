@@ -43,7 +43,8 @@ def error_500(request):
 
 
 def generate_roles_dict(roles):
-    return dict(map(lambda r: (r.name.lower(), r in roles), USER_DISPLAY_ORDER))
+    role_list = list(map(lambda r: (r.name[0]+r.name[1:]).lower(), roles))
+    return dict(map(lambda role: (role, role in role_list), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
 
 
 # Login endpoints
