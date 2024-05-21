@@ -41,12 +41,10 @@ USER_DISPLAY_ORDER = [
 def error_500(request):
     return render(request, "tournament/error_500.html")
 
-def generate_roles_dict(roles, testing=False):
-    role_list = list(map(lambda r: (r.name[0]+r.name[1:]).lower(), roles))
 
-    if testing == True:
-        return dict(map(lambda role: (role, True), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
-    return dict(map(lambda role: (role, role in role_list), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
+def generate_roles_dict(roles):
+    return dict(map(lambda r: (r.name.lower(), r in roles), USER_DISPLAY_ORDER))
+
 
 # Login endpoints
 
@@ -62,9 +60,7 @@ def login_view(request):
                 return JsonResponse({"status": "error", "message": "Failed to login"})
             
             involvement = user.get_tournament_involvement(tournament_iteration=OCT5).first()
-            roles = sorted(involvement.roles.get_roles(), key=lambda r: USER_DISPLAY_ORDER.index(r)) \
-                if involvement is not None else None
-            sorted_roles = generate_roles_dict(roles, True) # erm make sure to set this back to false
+            sorted_roles = generate_roles_dict(involvement.roles.get_roles())
             
             request.session["user"] = {
                 "osu_id": user.osu_id,
