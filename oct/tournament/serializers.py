@@ -52,11 +52,10 @@ class Serializer:
                     exclude.get(field, [])+serializer.excludes,
                     include.get(field)
                 )
+            elif isinstance(value, datetime):
+                data[json_name] = value.isoformat()
             else:
-                if isinstance(value, datetime):
-                    data[json_name] = value.isoformat()
-                else:
-                    data[json_name] = value
+                data[json_name] = value
         return data
 
     def _separate_field_args(self, fields):
@@ -116,7 +115,7 @@ class MappoolBeatmapSerializer:
 @serializer
 class UserSerializer:
     model = User
-    fields = ['osu_id', 'osu_username', 'osu_avatar', 'osu_cover', 'is_admin']
+    fields = ['osu_id', 'osu_username', 'osu_avatar', 'osu_cover', 'is_admin', 'user_roles']
 
 
 @serializer
@@ -155,6 +154,7 @@ class TournamentMatchSerializer:
         'progress',
         'has_started',
     ]
+
 @serializer
 class TournamentRoundSerializer:
     model = TournamentRound

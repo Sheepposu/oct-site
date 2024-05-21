@@ -9,14 +9,18 @@ class Team(models.Model):
 
     def get_players_with_user(self):
         return Player.objects.select_related("user").filter(team=self)
+    
+
 class Achievement(models.Model):
     name = models.CharField(max_length=32)
     category = models.CharField(max_length=64)
+
 
 class AchievementCompletion(models.Model):
     player = models.ForeignKey("Player", on_delete=models.RESTRICT)
     achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
     time_completed = models.DateTimeField()
+    
     
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)

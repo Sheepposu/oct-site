@@ -10,6 +10,39 @@ from time import time
 
 from common import get_auth_handler, enum_field, date_to_string
 
+class UserRoles(IntFlag):
+    # max 15 fields cuz small integer field
+    REGISTERED_PLAYER = auto()
+    REFEREE = auto()
+    STREAMER = auto()
+    COMMENTATOR = auto()
+    PLAYTESTER = auto()
+    MAPPOOLER = auto()
+    HOST = auto()
+    CUSTOM_MAPPER = auto()
+
+    def get_roles(self):
+        count = 1
+        value = self.value
+        while count <= value:
+            if count & value:
+                yield UserRoles(count)
+            count <<= 1
+
+USER_DISPLAY_ORDER = [
+    UserRoles.HOST,
+    UserRoles.REGISTERED_PLAYER,
+    UserRoles.CUSTOM_MAPPER,
+    UserRoles.MAPPOOLER,
+    UserRoles.PLAYTESTER,
+    UserRoles.STREAMER,
+    UserRoles.COMMENTATOR,
+    UserRoles.REFEREE
+]
+
+def generate_roles_dict(roles):
+    return dict(map(lambda r: (r.name.lower(), r in roles), USER_DISPLAY_ORDER))
+
 
 OSU_CLIENT: Client = settings.OSU_CLIENT
 ROUNDS_ORDER = ("QUALIFIERS", "RO128", "RO64", "RO32", "RO16", "QF", "SF", "FINALS", "GF")
@@ -51,26 +84,6 @@ def calculate_modded_stats(ar, od, cs, hp, mods):
         od = ms_to_od(od_to_ms(od)*4/3)
 
     return ar, od, cs, hp
-
-
-class UserRoles(IntFlag):
-    # max 15 fields cuz small integer field
-    REGISTERED_PLAYER = auto()
-    REFEREE = auto()
-    STREAMER = auto()
-    COMMENTATOR = auto()
-    PLAYTESTER = auto()
-    MAPPOOLER = auto()
-    HOST = auto()
-    CUSTOM_MAPPER = auto()
-
-    def get_roles(self):
-        count = 1
-        value = self.value
-        while count <= value:
-            if count & value:
-                yield UserRoles(count)
-            count <<= 1
 
 
 class BracketType(IntEnum):
@@ -126,6 +139,11 @@ class User(AbstractBaseUser):
     ]
 
     objects = UserManager()
+
+    @property
+    def user_roles(self):
+        involvement = self.get_tournament_involvement(tournament_iteration=TournamentIteration.objects.get(name="OCT5")).first()
+        return generate_roles_dict(involvement.roles.get_roles())
 
     def get_auth_handler(self):
         auth: AuthHandler = get_auth_handler()

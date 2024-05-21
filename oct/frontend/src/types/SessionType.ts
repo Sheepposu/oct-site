@@ -5,6 +5,7 @@ export type Session = {
     osu_username: string;
     osu_avatar: string;
     osu_cover: string;
+    is_admin: boolean;
     roles: {
       host: boolean;
       registered_player: boolean;

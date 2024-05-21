@@ -95,10 +95,12 @@ def logout_view(request):
 @ensure_csrf_cookie
 def session_view(request):
     if not request.user.is_authenticated:
-        request.session["user"] = None
-        return JsonResponse({'isAuthenticated': False, 'user': request.session.get("user")})
+        return JsonResponse({'isAuthenticated': False})
+    
+    user_serializer = UserSerializer(request.user)
+    serialized_user = user_serializer.serialize()
 
-    return JsonResponse({'isAuthenticated': True, 'user': request.session.get("user")})
+    return JsonResponse({'isAuthenticated': True, 'user': serialized_user}, safe=False)
 
 # TODO: maybe move caching logic to models
 def get_mappools(tournament: TournamentIteration):
