@@ -76,11 +76,9 @@ def login_view(request):
         
     except requests.HTTPError as exc:
         print(exc.response.text)
-        log_err(request, exc)
         return HttpResponseBadRequest()
     except Exception as exc:
         print(exc)
-        log_err(request, exc)
     return HttpResponseServerError()
 
 
@@ -246,50 +244,157 @@ def dashboard(req):
     t1 = time.time()
     if not req.user.is_authenticated:
         return HttpResponse(status=401)
-    involvement = req.user.get_tournament_involvement(tournament_iteration=OCT5).first()
-    context = {
-        "is_registered": involvement is not None and req.session["user"]["roles"]["registered_player"],
-    }
 
     player = StaticPlayer.objects.select_related("team").filter(
         user=req.user,
         team__bracket__tournament_iteration=OCT5
     ).first()
-    
-    # _matches = []
-    # if player is not None:
-    #     _matches += list(map(
-    #         lambda m: map_match_object(m, player),
-    #         player.team.tournamentmatch_set.prefetch_related("teams").select_related("tournament_round__bracket").all()
-    #     ))
-    # if involvement is not None and UserRoles.REFEREE in involvement.roles:
-    #     _matches += list(filter(lambda m: m not in _matches, map(
-    #         map_match_object, 
-    #         TournamentMatch.objects.filter(referee=req.user, tournament_round__bracket__tournament_iteration=OCT5)
-    #     )))
 
-    # matches = []
-    # for match in _matches:
-    #     match.pop("obj")
-    #     matches.append(match)
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"""
+            SELECT (
+                tournament_tournamentmatch.id,
+                tournament_tournamentmatch.match_id,
+                tournament_tournamentmatch.team_order,
+                tournament_tournamentmatch.starting_time,
+                tournament_tournamentmatch.is_losers,
+                tournament_tournamentmatch.osu_match_id,
+                tournament_tournamentmatch.bans,
+                tournament_tournamentmatch.picks,
+                tournament_tournamentmatch.wins,
+                tournament_tournamentmatch.finished,
+                tournament_tournamentmatch.referee_id,
+                referee.osu_id,
+                referee.osu_username,
+                referee.osu_avatar,
+                referee.osu_cover,
+                referee.is_admin,
+                tournament_tournamentmatch.streamer_id,
+                streamer.osu_id,
+                streamer.osu_username,
+                streamer.osu_avatar,
+                streamer.osu_cover,
+                streamer.is_admin,
+                tournament_tournamentmatch.commentator1_id,
+                commentator1.osu_id,
+                commentator1.osu_username,
+                commentator1.osu_avatar,
+                commentator1.osu_cover,
+                commentator1.is_admin,
+                tournament_tournamentmatch.commentator2_id,
+                commentator2.osu_id,
+                commentator2.osu_username,
+                commentator2.osu_avatar,
+                commentator2.osu_cover,
+                commentator2.is_admin,
+                tournament_tournamentmatch.tournament_round_id,
+                tournament_tournamentround.name,
+                tournament_tournamentround.full_name,
+                tournament_tournamentround.start_date,
+                tournament_tournamentround.mappack,
+                tournament_tournamentmatch_teams.tournamentteam_id,
+                tournament_tournamentteam.name,
+                tournament_tournamentteam.icon,
+                tournament_tournamentteam.seed,
+                tournament_staticplayer.id,
+                tournament_staticplayer.osu_rank,
+                tournament_staticplayer.is_captain,
+                tournament_staticplayer.tier,
+                tournament_staticplayer.user_id,
+                player_user.osu_id,
+                player_user.osu_username,
+                player_user.osu_avatar,
+                player_user.osu_cover,
+                player_user.is_admin
+            ) FROM tournament_tournamentmatch
+            INNER JOIN tournament_tournamentround ON (tournament_tournamentround.id = tournament_tournamentmatch.tournament_round_id)
+            INNER JOIN tournament_tournamentmatch_teams ON (tournament_tournamentmatch_teams.tournamentmatch_id = tournament_tournamentmatch.id)
+            INNER JOIN tournament_tournamentteam ON (tournament_tournamentmatch_teams.tournamentteam_id = tournament_tournamentteam.id)
+            INNER JOIN tournament_staticplayer ON (tournament_staticplayer.team_id = tournament_tournamentteam.id)
+            INNER JOIN tournament_user AS player_user ON (tournament_staticplayer.user_id = player_user.id)
+            LEFT JOIN tournament_user AS referee ON (referee.id = tournament_tournamentmatch.referee_id)
+            LEFT JOIN tournament_user AS streamer ON (streamer.id = tournament_tournamentmatch.streamer_id)
+            LEFT JOIN tournament_user AS commentator1 ON (commentator1.id = tournament_tournamentmatch.commentator1_id)
+            LEFT JOIN tournament_user AS commentator2 ON (commentator2.id = tournament_tournamentmatch.commentator2_id)
+            WHERE tournament_tournamentmatch.referee_id = '{req.user.id}' OR tournament_staticplayer.user_id = '{req.user.id}'
+            """
+        )
+
+        def parse_user(row):
+            return {
+                "id": row[0],
+                "osu_id": int(row[1]),
+                "osu_username": row[2],
+                "osu_avatar": row[3],
+                "osu_cover": row[4],
+                "is_admin": row[5] == "f"
+            } if row[0] is not None else None
+
+        partial_matches = [
+            {
+                "id": int(row[0]),
+                "match_id": int(row[1]),
+                "team_order": row[2],
+                "starting_time": row[3],
+                "is_losers": row[4] == "f",
+                "osu_match_id": int(row[5]),
+                "bans": row[6],
+                "picks": row[7],
+                "wins": row[8],
+                "finished": row[9] == "f",
+                "referee": parse_user(row[10:16]),
+                "streamer": parse_user(row[16:22]),
+                "commentator1": parse_user(row[22:28]),
+                "commentator2": parse_user(row[28:34]),
+                "tournament_round": {
+                    "id": int(row[34]),
+                    "name": row[35],
+                    "full_name": row[36],
+                    "start_date": row[37],
+                    "mappack": row[38],
+                },
+                "teams": [{
+                    "id": int(row[39]),
+                    "name": row[40],
+                    "icon": row[41],
+                    "seed": None if row[42] is None else int(row[42]),
+                    "players": [{
+                        "id": int(row[43]),
+                        "osu_rank": int(row[44]),
+                        "is_captain": row[45],
+                        "tier": row[46],
+                        "user": parse_user(row[47:53]),
+                    }]
+                }]
+            }
+            for row in map(lambda r: parse_sql_row(r[0]), cursor.fetchall())
+        ]
+
+    def combine(wholes, partial, hierarchy):
+        try:
+            whole = next(filter(lambda whole: whole["id"] == partial["id"], wholes))
+            if len(hierarchy) > 0:
+                attr = hierarchy[0]
+                combine(whole[attr], partial[attr][0], hierarchy[1:])
+        except StopIteration:
+            wholes.append(partial)
 
     matches = []
-    if player is not None:
-        matches += player.team.tournamentmatch_set.prefetch_related("teams").select_related("tournament_round__bracket").all()
-    if involvement is not None and UserRoles.REFEREE in involvement.roles:
-        matches += TournamentMatch.objects.filter(referee=req.user, tournament_round__bracket__tournament_iteration=OCT5)
+    for partial in partial_matches:
+        combine(matches, partial, ["teams", "players"])
+    # for partial in partial_matches:
+    #     try:
+    #         whole = next(filter(lambda m: m["id"] == partial["id"], matches))
+    #         try:
+    #             whole_team = next(filter(lambda m: m["id"] == partial["id"], whole["teams"]))
+    #
+    #         except StopIteration:
+    #             whole["teams"].append(partial["teams"][0])
+    #     except StopIteration:
+    #         matches.append(partial)
 
-    match_serializer = TournamentMatchSerializer(matches, many=True)
-    serialized_matches = match_serializer.serialize(exclude=["tournament_round"])
-
-    return JsonResponse(serialized_matches, safe=False)
-    
-    context["matches"] = matches # Removed the sorting, most likely will sort client side
-    print(matches)
-
-    t2 = time.time()
-    print(f"Elapsed time: {t2-t1}")
-    return JsonResponse({"response": context})
+    return JsonResponse(matches, safe=False)
 
 
 def tournaments(req, name=None, section=None):

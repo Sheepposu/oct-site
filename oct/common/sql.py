@@ -1,4 +1,4 @@
-def parse_sql_row(row: str, transformers):
+def parse_sql_row(row: str, transformers=None):
     if not row.startswith("(") or not row.endswith(")"):
         raise ValueError("Invalid row given")
     row = row[1:-1]+","
@@ -11,10 +11,14 @@ def parse_sql_row(row: str, transformers):
             value = row[min_i:i]
             if value.startswith('"'):
                 value = value[1:-1]
-            data.append(value.replace('""', '"'))
+            value = value.replace('""', '"')
+            data.append(value if value != "" else None)
             min_i = i+1
         elif row[i] == '"':
             inside_string = not inside_string
+
+    if transformers is None:
+        return data
             
     if len(transformers) != len(data):
         print(data)
