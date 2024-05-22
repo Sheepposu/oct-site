@@ -6,7 +6,7 @@ import { TournamentIterationType } from "src/types/TournamentIterationType";
 import "src/assets/css/tournaments.css";
 
 export default function Tournaments() {
-  const fetchTournamentsData = (): Promise<[TournamentIterationType]> =>
+  const fetchTournamentsData = (): Promise<TournamentIterationType[]> =>
     axios.get("/api/tournaments").then((resp) => resp.data);
 
   const tournamentsQuery = useQuery({

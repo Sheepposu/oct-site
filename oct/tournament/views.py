@@ -389,12 +389,17 @@ def dashboard(req):
 
 def tournaments(req, name=None, section=None):
     if name is None or name == "":
-        return render(req, "tournament/tournaments.html", {
-            "tournaments": TournamentIteration.objects.all()
-        })
+        serializer = TournamentIterationSerializer(TournamentIteration.objects.all(), many=True)
+        return JsonResponse(serializer.serialize(exclude=["users"]), safe=False)
     name = name.upper()
     tournament = get_object_or_404(TournamentIteration, name=name)
+    tournament_serializer = TournamentIterationSerializer(tournament)
     if section is None:
+        return JsonResponse({"tournament": tournament_serializer.serialize(exclude=["users"]),
+            "rounds": [{
+                "name": rnd.full_name,
+                "date": rnd.str_date
+            } for rnd in sorted(tournament.get_brackets()[0].get_rounds(), key=lambda rnd: rnd.start_date)]})
         return render(req, "tournament/tournament_info.html", {
             "tournament": tournament,
             "rounds": [{
