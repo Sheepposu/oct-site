@@ -9,7 +9,7 @@ export default function Logout() {
       throw Error(response.statusText);
     }
   }
-  fetch("/api/logout/", {
+  fetch("/api/logout", {
     credentials: "same-origin",
     headers: {
       "Content-Type": "application/json",

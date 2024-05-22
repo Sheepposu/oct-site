@@ -1,0 +1,23 @@
+.tournaments-container {
+  width: 90%;
+  margin: auto;
+  margin-top: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tournament {
+  width: 250px;
+  margin: 5px;
+  display: inline-block;
+}
+
+.tournament-thumbnail {
+  width: 100%;
+  border-radius: 15px;
+}
+
+.tournament-label-container {
+  width: 100%;
+}

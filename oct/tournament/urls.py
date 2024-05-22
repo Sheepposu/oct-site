@@ -7,9 +7,8 @@ urlpatterns = [
     # pages
     path("", views.index, name="index"),
     path("teams", views.tournament_teams, name="teams"),
-    path("login/", views.login_view, name="api-login"),
-    path("logout/", views.logout_view, name="api-logout"),
-    path("session/", views.session_view, name="session"),
+    path("login", views.login_view, name="api-login"),
+    path("logout", views.logout_view, name="api-logout"),
     path("dashboard", views.dashboard, name="dashboard"),
     # path("register", views.register, name="register"),
     # path("unregister", views.unregister, name="unregister"),

@@ -383,16 +383,6 @@ def dashboard(req):
     matches = []
     for partial in partial_matches:
         combine(matches, partial, ["teams", "players"])
-    # for partial in partial_matches:
-    #     try:
-    #         whole = next(filter(lambda m: m["id"] == partial["id"], matches))
-    #         try:
-    #             whole_team = next(filter(lambda m: m["id"] == partial["id"], whole["teams"]))
-    #
-    #         except StopIteration:
-    #             whole["teams"].append(partial["teams"][0])
-    #     except StopIteration:
-    #         matches.append(partial)
 
     return JsonResponse(matches, safe=False)
 

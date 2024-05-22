@@ -12,12 +12,15 @@ import Logout from "./routes/logout/page.tsx";
 import Dashboard from "./routes/dashboard/page.tsx";
 import Mappool from "./routes/Mappool/page.tsx";
 import Bracket from "./routes/bracket/page.tsx";
+import Tournaments from "./routes/tournaments/page.tsx";
+import TournamentInfo from "./routes/tournamentInfo/page.tsx";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     element: <Header />,
+    shouldRevalidate: () => false,
     children: [
       {
         path: "/",
@@ -42,6 +45,14 @@ const router = createBrowserRouter([
       {
         path: "/bracket",
         element: <Bracket />,
+      },
+      {
+        path: "/tournaments",
+        element: <Tournaments />,
+      },
+      {
+        path: "/tournaments/:tournament",
+        element: <TournamentInfo />,
       },
     ],
   },

@@ -145,8 +145,6 @@ class User(AbstractBaseUser):
     def user_roles(self):
         involvement = self.get_tournament_involvement(tournament_iteration=TournamentIteration.objects.get(name="OCT5")).first()
         sorted_roles = generate_roles_dict(involvement.roles.get_roles())
-        print(involvement.roles.get_roles())
-        print(sorted_roles)
         return sorted_roles
 
     def get_auth_handler(self):
@@ -302,6 +300,10 @@ class TournamentMatch(models.Model):
         elif not self.finished:
             return "ONGOING"
         return "FINISHED"
+    
+    @property
+    def round_str(self):
+        return self.tournament_round.name
 
     def get_match_info(self):
         if self.osu_match_id is None:

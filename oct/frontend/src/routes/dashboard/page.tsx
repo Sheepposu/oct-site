@@ -7,6 +7,8 @@ import { DashboardType } from "src/types/DashboardType";
 import axios from "axios";
 import MatchCard from "src/components/MatchCard";
 
+import "src/assets/css/dashboard.css";
+
 export default function Dashboard() {
   const { session, loading } = useContext(UserSessionContext);
 
@@ -35,7 +37,6 @@ export default function Dashboard() {
   }
 
   const data = dashboardQuery.data;
-  const matches = data.response.matches;
 
   return (
     <div>
@@ -64,8 +65,8 @@ export default function Dashboard() {
           <p className="font-bold pt-[20px] text-3xl">Matches</p>
           <div className="w-[95%] h-full overflow-y-scroll overflow-x-hidden">
             <div className="w-[calc(100%-50px)] py-0 px-5 flex flex-col items-center gap-3">
-              {matches.length > 0 ? (
-                matches.map((match, index) => (
+              {data.length > 0 ? (
+                data.map((match, index) => (
                   <MatchCard key={index} match={match} />
                 ))
               ) : (

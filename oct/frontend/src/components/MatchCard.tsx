@@ -7,12 +7,29 @@ import Box from "@mui/material/Box";
 import MatchPage from "./MatchPage";
 import { BsArrowUpRight, BsX } from "react-icons/bs";
 
-type MatchCardProps = {
-  match: MatchType;
-};
-
-export default function MatchCard(props: MatchCardProps) {
+export default function MatchCard(props: { match: MatchType }) {
   const match = props.match;
+  let time = null;
+  let has_started = false;
+  let progress = null;
+
+  if (match.starting_time == null) {
+    time = null;
+  } else {
+    time = new Date(match.starting_time);
+  }
+
+  if (time !== null) {
+    has_started = Date.now() > time.getMilliseconds();
+  }
+
+  if (!has_started && time !== null) {
+    progress = "UPCOMING";
+  } else if (!match.finished) {
+    progress = "ONGOING";
+  } else {
+    progress = "FINISHED";
+  }
 
   const [open, setOpen] = useState<boolean>(false);
   const handleOpen = () => setOpen(true);
@@ -20,40 +37,45 @@ export default function MatchCard(props: MatchCardProps) {
 
   return (
     <div
-      className={`w-[calc(100%-20px)] h-20 px-4 rounded-xl grid auto-cols-[1fr] grid-cols-[25%_auto_5%_50px] [box-shadow:1px_6px_11px_-3px_rgba(0,0,0,0.25)] justify-stretch items-center [background:linear-gradient(to_right,_${match.color}_0%,_#F6F6F6_30%,_#F6F6F6_100%)]`}
+      className={`w-[calc(100%-20px)] h-20 px-4 rounded-xl grid auto-cols-[1fr] grid-cols-[25%_auto_5%_50px] [box-shadow:1px_6px_11px_-3px_rgba(0,0,0,0.25)] justify-stretch items-center [background:linear-gradient(to_right,_#ffffff_0%,_#F6F6F6_30%,_#F6F6F6_100%)]`}
     >
-      {match.result == "QUALIFIERS" ? (
+      {match.tournament_round.name == "QUALIFIERS" ? (
         <>
           <p className="italic font-bold [font-size:clamp(30px,_2.5vw,_40px)]">
             Qualifiers
           </p>
-          <p className="text-center">{match.time_str}</p>
+          <p className="text-center">{time?.getUTCDate()}</p>
           <p className="text-right">{match.id}</p>
         </>
       ) : (
         <>
           <p className="italic font-bold [font-size:clamp(30px,_2.5vw,_40px)]">
-            {match.result}
+            {progress}
           </p>
           <div className="grid auto-cols-[1fr] grid-cols-[50px_auto_10%_auto_50px]">
             <img
-              src={match.team1?.icon == null ? osuLogo : match.team1.icon}
+              src={match.teams[0].icon == null ? osuLogo : match.teams[0].icon}
               alt="Team 1 match icon"
               className="h-12 rounded-full"
             />
-            <p className="[margin-block:auto] ml-1">{match.team1?.name}</p>
-            {match.result == "UPCOMING" ? (
-              <p className="text-center text-xl">{match.time_str}</p>
+            <p className="[margin-block:auto] ml-1">{match.teams[0].name}</p>
+            {progress == "UPCOMING" ? (
+              <p className="text-center text-xl">{time?.getDate()}</p>
             ) : (
-              <p className="[margin-block:auto] text-center">{match.score}</p>
+              <p className="[margin-block:auto] text-center">
+                {(match.wins?.split("1").length as number) - 1} -{" "}
+                {(match.wins?.split("2").length as number) - 1}
+              </p>
             )}
-            {!(match.team2 === undefined) ? (
+            {!(match.teams[1] === undefined) ? (
               <>
                 <p className="[margin-block:auto] mr-1 text-right">
-                  {match.team2?.name}
+                  {match.teams[1].name}
                 </p>
                 <img
-                  src={match.team2?.icon == null ? osuLogo : match.team2.icon}
+                  src={
+                    match.teams[1].icon == null ? osuLogo : match.teams[1].icon
+                  }
                   alt="Team 2 match icon"
                   className="h-12 rounded-full"
                 />
@@ -87,14 +109,14 @@ export default function MatchCard(props: MatchCardProps) {
                 <div className="h-full">
                   <div className="w-full h-14 flex rounded-xl bg-blue-300">
                     <div>
-                      {match.result == "QUALIFIERS" ? (
+                      {match.tournament_round.name == "QUALIFIERS" ? (
                         <p className="mt-3 ml-3 font-bold text-xl h-full text-center">
                           Qualifiers {match.id}
                         </p>
                       ) : (
                         <p className="mt-3 ml-3 font-bold text-xl h-full text-center">
-                          Match {match.id}: {match.team1?.name} vs{" "}
-                          {match.team2?.name}
+                          Match {match.id}: {match.teams[0].name} vs{" "}
+                          {match.teams[1].name}
                         </p>
                       )}
                     </div>

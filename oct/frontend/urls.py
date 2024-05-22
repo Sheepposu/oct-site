@@ -9,7 +9,6 @@ def index_view(request):
     
     user_serializer = UserSerializer(request.user)
     serialized_user = user_serializer.serialize()
-    print(f"Serialized user: {serialized_user}")
 
     return render(request, 'dist/index.html', {"data": {"isAuthenticated": True, "user": serialized_user}})
 

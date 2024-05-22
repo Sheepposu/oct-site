@@ -153,6 +153,7 @@ class TournamentMatchSerializer:
         'winner',
         'progress',
         'has_started',
+        'round_str'
     ]
 
 @serializer
@@ -170,7 +171,7 @@ class TournamentBracketSerializer:
 @serializer
 class TournamentIterationSerializer:
     model = TournamentIteration
-    fields = ['name', 'full_name', 'users', 'start_date', 'end_date', 'thumbnail', 'links']
+    fields = ['name', 'full_name', 'users', 'start_date', 'end_date', 'thumbnail', 'links', 'date_span']
 
 
 @serializer

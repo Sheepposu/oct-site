@@ -1,0 +1,165 @@
+body {
+  background-color: var(--bg-color4);
+}
+
+/* Header for standard browser on a computer */
+
+.tournament-header {
+  width: 100%;
+  height: 60px;
+  padding-left: 10px;
+
+  display: flex;
+
+  background-color: white;
+}
+
+.tournament-header-link {
+  height: 45px;
+  padding: 0 15px;
+  padding-top: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tournament-header-link:hover {
+  text-decoration: underline;
+}
+
+.current-tournament-header {
+  text-decoration: underline;
+}
+
+.tournament-header-text {
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Header for when width is small such as mobile */
+
+.mobile-tournament-header-container {
+  display: none; /* Hidden unless width is small */
+  width: 100%;
+  position: relative;
+  z-index: 8;
+}
+
+.mobile-tournament-header {
+  width: calc(100% - 40px);
+  height: 45px;
+  padding-left: 10px;
+  padding-right: 30px;
+  padding-top: 15px;
+
+  display: flex;
+  justify-content: space-between;
+
+  background-color: white;
+  cursor: pointer;
+}
+
+.mobile-tournament-header-arrow {
+  width: 40px;
+  height: 40px;
+}
+
+.mobile-header-dropdown-item {
+  height: 40px;
+  padding-left: 20px;
+  padding-top: 10px;
+}
+
+.mobile-header-dropdown-item:hover {
+  background-color: var(--bg-color7);
+  text-decoration: underline;
+}
+
+.mobile-header-dropdown-text {
+  font-size: 20px;
+}
+
+#mobile-tournament-header-dropdown {
+  background-color: var(--bg-color6);
+}
+
+/* Change header */
+@media (max-width: 900px) {
+  .tournament-header {
+    display: none;
+  }
+
+  .mobile-tournament-header-container {
+    display: inherit;
+  }
+}
+
+/* Info page stuff */
+
+.info-container {
+  width: 90%;
+  max-width: 700px;
+  border-radius: 20px;
+
+  margin: auto;
+  margin-top: 50px;
+  padding: 5px;
+  text-align: center;
+
+  background-color: #ffffff;
+}
+
+.info-title {
+  font-size: 30px;
+  font-weight: 900;
+  margin: 5px 0;
+}
+
+.info-subtitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 5px 0;
+}
+
+.info-text {
+  margin: 5px 0;
+}
+
+.info-date {
+  font-size: 10px;
+  margin-top: -5px;
+  margin-bottom: 5px;
+}
+
+.specific-container {
+  width: 300px;
+
+  padding: 5px 10px;
+  margin: 5px 10px;
+  border-radius: 20px;
+
+  background-color: var(--bg-color4);
+}
+
+.name-label {
+  font-weight: 500;
+}
+
+/* broad use classes */
+
+.user-container {
+  width: 100%;
+  gap: 10px;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border: 2px solid black;
+  border-radius: 50px;
+}
