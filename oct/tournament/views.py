@@ -342,7 +342,7 @@ def dashboard(req):
                 "bans": row[6],
                 "picks": row[7],
                 "wins": row[8],
-                "finished": row[9] == "f",
+                "finished": row[9] == "t",
                 "referee": parse_user(row[10:16]),
                 "streamer": parse_user(row[16:22]),
                 "commentator1": parse_user(row[22:28]),
