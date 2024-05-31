@@ -40,31 +40,24 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="p-8 h-48 flex justify-center">
-        <img
-          src={session?.user?.osu_avatar}
-          className="h-full relative z-20 rounded-full"
-        />
-        <div className="relative h-full w-5/6 flex justify-center">
-          <div
-            id="dashboard-card-cover"
-            className={`h-full w-5/6 rounded-full z-20 absolute justify-center flex flex-col`}
-          ></div>
-          <img
-            className="h-full w-5/6 rounded-full z-10 absolute"
-            src={session?.user?.osu_cover}
-          />
+      <div className="user-card-container">
+        <img src={session?.user?.osu_avatar} className="user-card-pfp" />
+        <div
+          className="user-card-info"
+          style={{
+            backgroundImage: `linear-gradient(to right, #F6F6F6 40%, transparent), ${session?.user?.osu_cover}`,
+          }}
+        >
+          <p className="user-card-username">{session?.user?.osu_username}</p>
+          <p>Roles: Figure this out</p>
         </div>
-        <p className="font-extrabold italic text-5xl whitespace-nowrap overflow-hidden overflow-ellipsis">
-          {session?.user?.osu_username}
-        </p>
-        <p>Roles</p>
       </div>
-      <div className="w-full h-[500px] items-center justify-center flex flex-col">
-        <div className="w-5/6 h-full flex flex-grow flex-col items-center rounded-xl bg-[#E8E7E7]">
-          <p className="font-bold pt-[20px] text-3xl">Matches</p>
-          <div className="w-[95%] h-full overflow-y-scroll overflow-x-hidden">
-            <div className="w-[calc(100%-50px)] py-0 px-5 flex flex-col items-center gap-3">
+
+      <div className="matches-box-container">
+        <div className="matches-box">
+          <p className="box-header-text">Matches</p>
+          <div className="scroll-container">
+            <div className="matches-container">
               {data.length > 0 ? (
                 data.map((match, index) => (
                   <MatchCard key={index} match={match} />

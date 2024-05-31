@@ -287,18 +287,6 @@ hr {
 
   background-color: var(--bg-color7);
 }
-
-/* Change header displayed */
-@media (max-width: 900px) {
-  .header {
-    display: none;
-  }
-
-  #mobile-header {
-    display: flex;
-  }
-}
-
 /* Popup */
 
 #popup-background {

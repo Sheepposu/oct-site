@@ -7,11 +7,14 @@ import Box from "@mui/material/Box";
 import MatchPage from "./MatchPage";
 import { BsArrowUpRight, BsX } from "react-icons/bs";
 
+const matchColors = {};
+
 export default function MatchCard(props: { match: MatchType }) {
   const match = props.match;
   let time = null;
-  let has_started = false;
+  let hasStarted = false;
   let progress = null;
+  let color = null;
 
   if (match.starting_time == null) {
     time = null;
@@ -20,15 +23,15 @@ export default function MatchCard(props: { match: MatchType }) {
   }
 
   if (time !== null) {
-    has_started = Date.now() > time.getMilliseconds();
+    hasStarted = Date.now() > time.getMilliseconds();
   }
 
-  if (!has_started && time !== null) {
+  if (!hasStarted && time !== null) {
     progress = "UPCOMING";
-  } else if (!match.finished) {
-    progress = "ONGOING";
-  } else {
+  } else if (match.finished) {
     progress = "FINISHED";
+  } else {
+    progress = "ONGOING";
   }
 
   const [open, setOpen] = useState<boolean>(false);
@@ -44,7 +47,7 @@ export default function MatchCard(props: { match: MatchType }) {
           <p className="italic font-bold [font-size:clamp(30px,_2.5vw,_40px)]">
             Qualifiers
           </p>
-          <p className="text-center">{time?.getUTCDate()}</p>
+          <p className="text-center">{time?.toLocaleDateString()}</p>
           <p className="text-right">{match.id}</p>
         </>
       ) : (
