@@ -9,7 +9,7 @@ import Tournaments from "./tournament";
 import TournamentInfo from "./tournament/tournament";
 import Bracket from "./tournament/tournament/bracket";
 import Mappool from "./tournament/tournament/mappool";
-import AchievementHeader from "./achievements/components/AchievementHeader";
+import AchievementHeader from "../components/achievements/AchievementHeader";
 import AchievementsInfoPage from "./achievements";
 import TeamsPage from "./achievements/teams";
 
