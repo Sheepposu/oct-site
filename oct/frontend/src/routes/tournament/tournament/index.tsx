@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useParams } from "react-router-dom";
 import { TournamentInfoType } from "src/types/TournamentInfoType";
 
-import "src/assets/css/tournament_info.css";
+import "src/assets/css/tournaments/tournament/index.css";
 
 export default function TournamentInfo() {
   const params = useParams();

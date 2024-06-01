@@ -3,7 +3,7 @@ import axios from "axios";
 import TournamentCard from "src/components/TournamentCard";
 import { TournamentIterationType } from "src/types/TournamentIterationType";
 
-import "src/assets/css/tournaments.css";
+import "src/assets/css/tournaments/tournaments.css";
 
 export default function Tournaments() {
   const fetchTournamentsData = (): Promise<TournamentIterationType[]> =>

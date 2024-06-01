@@ -1,6 +1,6 @@
 import { Link, Outlet } from "react-router-dom";
 
-import "src/assets/css/achievement_info.css";
+import "src/assets/css/achievements/header.css";
 
 export default function AchievementHeader() {
   return (

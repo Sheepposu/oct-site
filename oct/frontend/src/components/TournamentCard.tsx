@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { TournamentIterationType } from "src/types/TournamentIterationType";
 
-import "src/assets/css/tournaments.css";
+import "src/assets/css/tournaments/tournaments.css";
 import oct3Thumbnail from "src/assets/images/oct3-thumbnail.png";
 import oct4Thumbnail from "src/assets/images/oct4-thumbnail.png";
 
