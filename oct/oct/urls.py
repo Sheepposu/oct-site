@@ -14,13 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, include, re_path
-from django.shortcuts import render
+from django.urls import path, include
 
 handler500 = "tournament.views.error_500"
 urlpatterns = [
+    path("api/achievements/", include("achievements.urls")),
     path("api/", include("tournament.urls")),
-    # path("achievements/", include("achievements.urls")),
     path("__debug__/", include("debug_toolbar.urls")),
     path("", include("frontend.urls"), name='index')
 ]
