@@ -101,6 +101,7 @@ def session_view(request):
 
     return JsonResponse({'isAuthenticated': True, 'user': serialized_user}, safe=False)
 
+
 # TODO: maybe move caching logic to models
 def get_mappools(tournament: TournamentIteration):
     mps = cache.get(f"{tournament.name}_mappools")
@@ -123,6 +124,7 @@ def get_mappools(tournament: TournamentIteration):
         cache.set(f"{tournament.name}_mappools", mps, None)
     return mps
 
+
 def get_rounds(tournament: TournamentIteration, names=False):
     brackets = tournament.get_brackets()
     if not brackets:
@@ -137,6 +139,7 @@ def get_rounds(tournament: TournamentIteration, names=False):
         } for round in rounds]
 
     return rounds
+
 
 def get_teams(tournament: TournamentIteration):
     teams = cache.get(f"{tournament.name}_teams")
@@ -395,17 +398,12 @@ def tournaments(req, name=None, section=None):
     tournament = get_object_or_404(TournamentIteration, name=name)
     tournament_serializer = TournamentIterationSerializer(tournament)
     if section is None:
-        return JsonResponse({"tournament": tournament_serializer.serialize(exclude=["users"]),
+        return JsonResponse({
+            "tournament": tournament_serializer.serialize(exclude=["users"]),
             "rounds": [{
                 "name": rnd.full_name,
                 "date": rnd.str_date
-            } for rnd in sorted(tournament.get_brackets()[0].get_rounds(), key=lambda rnd: rnd.start_date)]})
-        return render(req, "tournament/tournament_info.html", {
-            "tournament": tournament,
-            "rounds": [{
-                "name": rnd.full_name,
-                "date": rnd.str_date
-            } for rnd in sorted(tournament.get_brackets()[0].get_rounds(), key=lambda rnd: rnd.start_date)]  # TODO: possible multiple brackets
+            } for rnd in sorted(tournament.get_brackets()[0].get_rounds(), key=lambda rnd: rnd.start_date)]
         })
     try:
         return {
@@ -807,3 +805,6 @@ def unregister(req):
     involvement.roles = UserRoles(involvement.roles - UserRoles.REGISTERED_PLAYER)
     involvement.save()
     return redirect("dashboard")
+
+
+

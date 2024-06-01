@@ -5,58 +5,20 @@ import UserSessionProvider from "./UserSessionProvider.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 
-import App from "./App.tsx";
 import Header from "./components/Header.tsx";
-import Login from "./routes/login/page.tsx";
-import Logout from "./routes/logout/page.tsx";
-import Dashboard from "./routes/dashboard/page.tsx";
-import Mappool from "./routes/Mappool/page.tsx";
-import Bracket from "./routes/bracket/page.tsx";
-import Tournaments from "./routes/tournaments/page.tsx";
-import TournamentInfo from "./routes/tournamentInfo/page.tsx";
 
-const queryClient = new QueryClient();
+import AppRouteManager from "./routes/route.tsx";
+
 
 const router = createBrowserRouter([
   {
     element: <Header />,
     shouldRevalidate: () => false,
-    children: [
-      {
-        path: "/",
-        element: <App />,
-      },
-      {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/logout",
-        element: <Logout />,
-      },
-      {
-        path: "/dashboard",
-        element: <Dashboard />,
-      },
-      {
-        path: "/mappools",
-        element: <Mappool />,
-      },
-      {
-        path: "/bracket",
-        element: <Bracket />,
-      },
-      {
-        path: "/tournaments",
-        element: <Tournaments />,
-      },
-      {
-        path: "/tournaments/:tournament",
-        element: <TournamentInfo />,
-      },
-    ],
+    children: (new AppRouteManager()).get_routes()
   },
 ]);
+
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
