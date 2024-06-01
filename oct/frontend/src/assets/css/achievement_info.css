@@ -1,0 +1,32 @@
+.achievement-header {
+  width: 100%;
+  height: 60px;
+  padding-left: 10px;
+
+  display: flex;
+
+  background-color: white;
+}
+
+.achievement-header-link {
+  height: 45px;
+  padding: 0 15px;
+  padding-top: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.achievement-header-link:hover {
+  text-decoration: underline;
+}
+
+.current-achievement-header {
+  text-decoration: underline;
+}
+
+.achievement-header-text {
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 500;
+}

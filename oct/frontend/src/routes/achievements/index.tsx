@@ -1,3 +1,7 @@
-export default function Page() {
-    return (<></>);
+export default function AchievementsInfoPage() {
+  return (
+    <div>
+      <p>Placeholder</p>
+    </div>
+  );
 }

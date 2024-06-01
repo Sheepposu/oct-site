@@ -20,14 +20,19 @@ export default function Header() {
             <p className="header-text">Tournaments</p>
           </div>
         </Link>
-        <Link to="/mappools" className="header-link">
+        <Link to="/tournaments/mappool" className="header-link">
           <div className="header-link-container">
             <p className="header-text">Mappools</p>
           </div>
         </Link>
-        <Link to="/bracket" className="header-link">
+        <Link to="/tournaments/bracket" className="header-link">
           <div className="header-link-container">
             <p className="header-text">Bracket</p>
+          </div>
+        </Link>
+        <Link to="/achievements" className="header-link">
+          <div className="header-link-container">
+            <p className="header-text">Achievements</p>
           </div>
         </Link>
         <div style={{ flex: 1 }}></div>

@@ -5,18 +5,9 @@ import UserSessionProvider from "./UserSessionProvider.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./index.css";
 
-import Header from "./components/Header.tsx";
+import { routes } from "./routes/routes.tsx";
 
-import AppRouteManager from "./routes/route.tsx";
-
-
-const router = createBrowserRouter([
-  {
-    element: <Header />,
-    shouldRevalidate: () => false,
-    children: (new AppRouteManager()).getRoutes()
-  },
-]);
+const router = createBrowserRouter(routes);
 
 const queryClient = new QueryClient();
 
