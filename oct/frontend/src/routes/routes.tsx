@@ -1,4 +1,5 @@
 import { type RouteObject } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import Header from "src/components/Header";
 import Index from "./index";
 import Login from "./login";
@@ -18,45 +19,59 @@ export const routes: RouteObject[] = [
     shouldRevalidate: () => false,
     children: [
       {
-        path: "",
+        index: true,
         element: <Index />,
       },
       {
-        path: "/login",
+        path: "login",
         element: <Login />,
       },
       {
-        path: "/logout",
+        path: "logout",
         element: <Logout />,
       },
       {
-        path: "/dashboard",
+        path: "dashboard",
         element: <Dashboard />,
       },
       {
-        path: "/tournaments",
-        element: <Tournaments />,
+        path: "tournaments",
+        element: <Outlet />,
         children: [
           {
-            path: "/bracket",
+            index: true,
+            element: <Tournaments />
+          },
+          {
+            path: "bracket",
             element: <Bracket />
           },
           {
-            path: "/mappool",
+            path: "mappool",
             element: <Mappool />
           },
           {
-            path: "/:tournament",
-            element: <TournamentInfo />,
+            path: ":tournament",
+            element: <Outlet />,  // TournamentsHeader
             children: [
-              path: "/mappool",
-              element: <></>
+              {
+                index: true,
+                element: <TournamentInfo />
+              },
+              {
+                path: "mappool",
+                element: <></>
+              },
+              {
+                path: "bracket",
+                element: <></>
+              }
             ]
           }
         ]
       },
       {
-        path: "/achievements",
+        path: "achievements",
         element: <AchievementHeader />,
         children: [
           {
