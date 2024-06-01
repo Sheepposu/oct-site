@@ -36,18 +36,24 @@ export const routes: RouteObject[] = [
       {
         path: "/tournaments",
         element: <Tournaments />,
-      },
-      {
-        path: "/tournaments/bracket",
-        element: <Bracket />,
-      },
-      {
-        path: "/tournaments/mappool",
-        element: <Mappool />,
-      },
-      {
-        path: "/tournaments/:tournament",
-        element: <TournamentInfo />,
+        children: [
+          {
+            path: "/bracket",
+            element: <Bracket />
+          },
+          {
+            path: "/mappool",
+            element: <Mappool />
+          },
+          {
+            path: "/:tournament",
+            element: <TournamentInfo />,
+            children: [
+              path: "/mappool",
+              element: <></>
+            ]
+          }
+        ]
       },
       {
         path: "/achievements",
