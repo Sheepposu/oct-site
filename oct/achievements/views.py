@@ -89,8 +89,9 @@ def team(req):
     return JsonResponse({"team": get_full_team(user_id=req.user.id)}, safe=False)
 
 
+@require_POST
 def join_team(req):
-    invite = req.GET.get("invite")
+    invite = req.POST.get("invite")
     print(invite)
     team = None
     if invite is not None:
@@ -108,6 +109,7 @@ def join_team(req):
     return JsonResponse({"team": team}, safe=False)
 
 
+@require_POST
 def leave_team(req):
     team = None
     if req.user.is_authenticated:
@@ -123,8 +125,9 @@ def leave_team(req):
     return JsonResponse({}, safe=False)
 
 
+@require_POST
 def create_team(req):
-    name = req.GET.get("name")
+    name = req.POST.get("name")
     if name is None or len(name) == 0 or len(name) > 31:
         return JsonResponse({"error": "invalid name"}, status=400, safe=False)
     
