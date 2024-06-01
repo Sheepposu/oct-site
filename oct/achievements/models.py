@@ -4,8 +4,9 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class Team(models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=32, unique=True)
     icon = models.CharField(max_length=64, null=True)
+    invite = models.CharField(max_length=16)
 
     def get_players_with_user(self):
         return Player.objects.select_related("user").filter(team=self)
