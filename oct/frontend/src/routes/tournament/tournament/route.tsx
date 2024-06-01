@@ -4,7 +4,7 @@ import TournamentInfo from ".";
 import Mappool from "./mappool";
 
 export default class TournamentRouteManager extends RouteManager {
-    get_routes(): RouteObject[] {
+    getRoutes(): RouteObject[] {
         return [
             {
                 path: "",

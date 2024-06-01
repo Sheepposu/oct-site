@@ -8,7 +8,7 @@ import Dashboard from "./dashboard";
 
 
 export default class AppRouteManager extends RouteManager {
-    get_routes(): RouteObject[] {
+    getRoutes(): RouteObject[] {
         return [
             {
                 path: "",
@@ -27,8 +27,8 @@ export default class AppRouteManager extends RouteManager {
                 element: <Dashboard />
             }
         ].concat(
-            (new TournamentsRouteManager()).get_routes_under("/tournaments"),
-            (new AchievementsRouteManager()).get_routes_under("/achievements")
+            (new TournamentsRouteManager()).getRoutesUnder("/tournaments"),
+            (new AchievementsRouteManager()).getRoutesUnder("/achievements")
         );
     }
 }

@@ -4,7 +4,7 @@ import TeamPage from "./team";
 
 
 export default class AchievementsRouteManager extends RouteManager {
-    public get_routes(): RouteObject[] {
+    public getRoutes(): RouteObject[] {
         return [
             {
                 path: "",

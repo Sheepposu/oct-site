@@ -14,7 +14,7 @@ const router = createBrowserRouter([
   {
     element: <Header />,
     shouldRevalidate: () => false,
-    children: (new AppRouteManager()).get_routes()
+    children: (new AppRouteManager()).getRoutes()
   },
 ]);
 

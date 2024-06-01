@@ -4,14 +4,14 @@ import Tournaments from ".";
 
 
 export default class TournamentsRouteManager extends RouteManager {
-    get_routes(): RouteObject[] {
+    getRoutes(): RouteObject[] {
         return [
             {
                 path: "",
                 element: <Tournaments />
             }
         ].concat(
-            (new TournamentRouteManager()).get_routes_under("/:tournament")
+            (new TournamentRouteManager()).getRoutesUnder("/:tournament")
         );
     }
 }

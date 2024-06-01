@@ -4,10 +4,10 @@ export interface RouteObject {
 }
 
 export abstract class RouteManager {
-    abstract get_routes(): RouteObject[];
+    abstract getRoutes(): RouteObject[];
 
-    get_routes_under(path: string): RouteObject[] {
-        const routes = this.get_routes();
+    getRoutesUnder(path: string): RouteObject[] {
+        const routes = this.getRoutes();
         for (const route of routes) {
             route.path = path + route.path;
         }
