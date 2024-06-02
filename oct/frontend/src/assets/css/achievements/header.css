@@ -10,9 +10,9 @@
 
 .achievement-header-link {
   height: 45px;
-  padding: 0 15px;
-  padding-top: 15px;
-  overflow: hidden;
+  padding-top: 10px;
+  padding-left: 15px;
+  padding-right: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
