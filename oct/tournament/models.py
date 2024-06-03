@@ -127,12 +127,17 @@ class UserManager(BaseUserManager):
         user_obj.save()
         return user_obj
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, select_extra=True, **kwargs):
+        if not select_extra:
+            return super().get(*args, **kwargs)
         user = User.select_with(("involvements",), **kwargs)
         if user is not None:
             return user[0]
+        raise models.ObjectDoesNotExist()
 
-    def filter(self, *args, **kwargs):
+    def filter(self, *args, select_extra=True, **kwargs):
+        if not select_extra:
+            return super().filter(*args, **kwargs)
         return User.select_with(("involvements",), **kwargs)
 
 
