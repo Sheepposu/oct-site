@@ -8,7 +8,13 @@ from osu import Client, AuthHandler, GameModeStr, Mods
 from datetime import datetime, timezone
 from time import time
 
-from common import get_auth_handler, enum_field, date_to_string
+from common import get_auth_handler, enum_field, date_to_string, RelationCachingModel
+
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..common import get_auth_handler, enum_field, date_to_string, RelationCachingModel
+
 
 class UserRoles(IntFlag):
     # max 15 fields cuz small integer field
@@ -29,6 +35,7 @@ class UserRoles(IntFlag):
                 yield UserRoles(count)
             count <<= 1
 
+
 USER_DISPLAY_ORDER = [
     UserRoles.HOST,
     UserRoles.REGISTERED_PLAYER,
@@ -39,6 +46,7 @@ USER_DISPLAY_ORDER = [
     UserRoles.COMMENTATOR,
     UserRoles.REFEREE
 ]
+
 
 def generate_roles_dict(roles):
     role_list = list(map(lambda r: (r.name[0]+r.name[1:]).lower(), roles))
@@ -119,8 +127,16 @@ class UserManager(BaseUserManager):
         user_obj.save()
         return user_obj
 
+    def get(self, *args, **kwargs):
+        user = User.select_with(("involvements",), **kwargs)
+        if user is not None:
+            return user[0]
 
-class User(AbstractBaseUser):
+    def filter(self, *args, **kwargs):
+        return User.select_with(("involvements",), **kwargs)
+
+
+class User(AbstractBaseUser, RelationCachingModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     osu_id = models.PositiveIntegerField(unique=True, editable=False)
     osu_username = models.CharField(max_length=15, unique=True)
@@ -141,11 +157,16 @@ class User(AbstractBaseUser):
 
     objects = UserManager()
 
+    def __init__(self, *args, **kwargs):
+        RelationCachingModel.__init__(self, *args, **kwargs, call_super=False)
+        super().__init__(*args, **kwargs)
+
     @property
-    def user_roles(self):
-        involvement = self.get_tournament_involvement(tournament_iteration=TournamentIteration.objects.get(name="OCT5")).first()
-        sorted_roles = generate_roles_dict(involvement.roles.get_roles())
-        return sorted_roles
+    def roles(self):
+        roles = {}
+        for involvement in self.involvements:
+            roles[involvement.tournament_iteration_id] = generate_roles_dict(involvement.roles.get_roles())
+        return roles
 
     def get_auth_handler(self):
         auth: AuthHandler = get_auth_handler()
@@ -168,7 +189,7 @@ class User(AbstractBaseUser):
         return self.osu_username
 
 
-class TournamentIteration(models.Model):
+class TournamentIteration(RelationCachingModel):
     name = models.CharField(max_length=8, primary_key=True)
     full_name = models.CharField(max_length=32)
     users = models.ManyToManyField(User, through="TournamentInvolvement")
@@ -188,8 +209,8 @@ class TournamentIteration(models.Model):
         return f"{date_to_string(self.start_date)} - {date_to_string(self.end_date)}"
 
 
-class TournamentInvolvement(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+class TournamentInvolvement(RelationCachingModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="involvements")
     tournament_iteration = models.ForeignKey(TournamentIteration, on_delete=models.CASCADE)
     roles = UserRolesField(default=0)
     join_date = models.DateTimeField(null=True)
@@ -198,7 +219,7 @@ class TournamentInvolvement(models.Model):
         return str(self.roles)
 
 
-class TournamentBracket(models.Model):
+class TournamentBracket(RelationCachingModel):
     # one-to-many relationship in case multiple brackets are used
     # in the future
     tournament_iteration = models.ForeignKey(TournamentIteration, on_delete=models.CASCADE)
@@ -212,7 +233,7 @@ class TournamentBracket(models.Model):
         return self.type.name
 
 
-class TournamentTeam(models.Model):
+class TournamentTeam(RelationCachingModel):
     bracket = models.ForeignKey(TournamentBracket, on_delete=models.RESTRICT)
     name = models.CharField(max_length=64)
     icon = models.CharField(max_length=64, null=True)
@@ -225,7 +246,7 @@ class TournamentTeam(models.Model):
         return self.name
 
 
-class StaticPlayer(models.Model):
+class StaticPlayer(RelationCachingModel):
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
     team = models.ForeignKey(TournamentTeam, on_delete=models.CASCADE, related_name="players")
     osu_rank = models.PositiveIntegerField()
@@ -233,7 +254,7 @@ class StaticPlayer(models.Model):
     tier = models.CharField(max_length=1, null=True)
 
 
-class Mappool(models.Model):
+class Mappool(RelationCachingModel):
     def get_rounds(self, **kwargs):
         return TournamentRound.objects.filter(mappool=self, **kwargs)
 
@@ -241,7 +262,7 @@ class Mappool(models.Model):
         return MappoolBeatmap.objects.filter(mappool=self, **kwargs)
 
 
-class TournamentRound(models.Model):
+class TournamentRound(RelationCachingModel):
     bracket = models.ForeignKey(TournamentBracket, on_delete=models.CASCADE)
     mappool = models.ForeignKey(Mappool, on_delete=models.RESTRICT)
     mappack = models.CharField(default="")
@@ -266,7 +287,7 @@ class TournamentRound(models.Model):
         return ROUNDS_ORDER.index(self.name) > ROUNDS_ORDER.index(other.name)
 
 
-class TournamentMatch(models.Model):
+class TournamentMatch(RelationCachingModel):
     tournament_round = models.ForeignKey(TournamentRound, on_delete=models.CASCADE)
     match_id = models.PositiveSmallIntegerField()
     teams = models.ManyToManyField(TournamentTeam)
@@ -341,7 +362,7 @@ class TournamentMatch(models.Model):
         return not self.__gt__(other)
 
 
-class MappoolBeatmap(models.Model):
+class MappoolBeatmap(RelationCachingModel):
     mappool = models.ForeignKey(Mappool, on_delete=models.CASCADE)
     beatmap_id = models.PositiveIntegerField()
     modification = models.CharField(max_length=4)

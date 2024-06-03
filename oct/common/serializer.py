@@ -23,20 +23,20 @@ class Serializer:
         for serializer in _SERIALIZERS:
             if isinstance(obj, serializer.model):
                 return serializer
-        raise NotImplementedError(f"Could not find serializer for {obj.__class__.__name__}")
+        raise ValueError(f"Could not find serializer for {obj.__class__.__name__}")
 
     def _get_serializer_of_model(self, model) -> Type['Serializer']:
         for serializer in _SERIALIZERS:
             if model == serializer.model:
                 return serializer
-        raise NotImplementedError(f"Could not find serializer for {model}")
+        raise ValueError(f"Could not find serializer for {model}")
 
     def _transform(self, obj, fields, exclude, include):
         data = {}
         for field in fields:
-            field_type = getattr(self.model, field, None)
+            field_type = getattr(self.model, field)
             json_name = self.transforms[field] if field in self.transforms else field
-            value = getattr(obj, field, None)
+            value = getattr(obj, field)
             if value is None:
                 data[json_name] = None
                 continue
@@ -47,9 +47,15 @@ class Serializer:
                     include.get(field)
                 )
             elif isinstance(field_type, ReverseManyToOneDescriptor):
-                serializer = self._get_serializer_of_model(value.model)
-                data[json_name] = serializer(value.all(), many=True).serialize(
-                    exclude.get(field, [])+serializer.excludes,
+                try:
+                    serializer = self._get_serializer_of_model(value.model)(value.all(), many=True)
+                except AttributeError:  # value is a list (cached value)
+                    if len(value) == 0:
+                        data[json_name] = []
+                        continue
+                    serializer = self._get_serializer_of_obj(value[0])(value, many=True)
+                data[json_name] = serializer.serialize(
+                    exclude.get(field, []) + serializer.excludes,
                     include.get(field)
                 )
             elif isinstance(value, datetime):
@@ -62,11 +68,10 @@ class Serializer:
         now = []
         later = defaultdict(list)
         for field in fields:
-            if "." in field:
-                split_field = field.split(".")
-                later[split_field[0]].append(".".join(split_field[1:]))
-            else:
-                now.append(field)
+            split = field.split(".", 1)
+            if len(split) > 1:
+                later[split[0]].append(split[1])
+            now.append(split[0])
         return now, later
 
     def serialize(self, exclude=None, include=None):
@@ -80,7 +85,7 @@ class Serializer:
         fields = list(self.fields)
         for field in exclude_now:
             fields.remove(field)
-        for field in include_later:
+        for field in include_now:
             fields.append(field)
 
         transform = lambda obj: self._transform(obj, fields, exclude_later, include_later)

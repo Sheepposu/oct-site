@@ -1,3 +1,14 @@
+from django.db import connection
+from django.db.models import ForeignKey, ManyToOneRel
+
+from typing import Iterable
+
+
+__all__ = (
+    "parse_sql_row",
+)
+
+
 def parse_sql_row(row: str, transformers=None):
     if not row.startswith("(") or not row.endswith(")"):
         raise ValueError("Invalid row given")
