@@ -6,8 +6,15 @@ export default function AchievementHeader() {
   return (
     <>
       <div className="achievement-header">
+        <Link to="">
+          <div className="achievement-header-link">
+            <p className="achievement-header-text">Info</p>
+          </div>
+        </Link>
         <Link to="teams">
-          <p>e</p>
+          <div className="achievement-header-link">
+            <p className="achievement-header-text">Teams</p>
+          </div>
         </Link>
       </div>
       <Outlet />
