@@ -8,7 +8,7 @@ export default function AchievementsInfoPage() {
       <p className="info-subtitle">About</p>
       <p className="info-text">
         Offline Chat Achievement Hunt is a team event with the objective of collecting achievements!
-        Note that an "achievement" does <b>not</b> refer to osu's official medals. The event will feature
+        Note that "achievement" does <b>not</b> refer to osu's official medals. The event will feature
         a wide variety of achievements and categories on the site and teams will compete to get as many points
         as possible before the event ends. 
       </p>

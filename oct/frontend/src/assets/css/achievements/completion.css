@@ -1,0 +1,221 @@
+:root {
+    --border-rounding: 15px;
+    --border-rounding-less: 10px;
+    --button-color: #438efd;
+    --button-color-hover: #52a1ff;
+}
+
+h1 {
+    margin: 0;
+    font-size: 30px;
+}
+p {
+    margin: 0;
+    font-size: 20px;
+}
+
+.page-container {
+    width: 100%;
+    padding: 0 20px;
+    padding-top: 50px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+}
+
+.achievements-container {
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    order: 1;
+}
+
+.achievement {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    border-radius: var(--border-rounding);
+
+    background-color: var(--bg-color7);
+}
+
+.achievement-info-container {
+    padding: 10px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+
+    border-radius: var(--border-rounding);
+
+    background-color: white;
+}
+
+.achievement-info-container.complete {
+    background: linear-gradient(to left, #5afa4b, white 150px);
+}
+
+.achievement-info {
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.achievement-details-container {
+    background-color: white;
+}
+
+.progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    order: 2;
+}
+
+.total-achievements-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    border-radius: var(--border-rounding);
+
+    background-color: var(--bg-color7);
+}
+
+.total-achievements-inner-container {
+    flex-grow: 1;
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+
+    border-radius: var(--border-rounding);
+
+    background-color: white;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 25px;
+
+    border: solid black 2px;
+    border-radius: 25px;
+
+    background-color: white;
+}
+
+.progress-bar-inner {
+    width: 50%;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background-color: var(--bg-color1);
+}
+
+#submit-button {
+    height: 50px;
+    padding: 5px 10px;
+    margin: 0 10px;
+
+    background-color: var(--button-color);
+    transition: background-color 0.2s;
+}
+
+#submit-button:hover {
+    background-color: var(--button-color-hover);
+}
+
+.leaderboard {
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+
+    border-radius: var(--border-rounding);
+
+    background-color: white;
+}
+
+.leaderboard-entry {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    border-radius: var(--border-rounding-less);
+
+    background-color: var(--bg-color7);
+}
+
+.leaderboard-foreground-container {
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+
+    border: solid black 2px;
+    border-radius: var(--border-rounding-less);
+
+    background-color: white;
+
+    overflow: hidden;
+    text-wrap: nowrap;
+}
+
+.placement-container {
+    height: 100%;
+    padding: 5px 10px;
+
+    border-radius: var(--border-rounding-less) 0 0 var(--border-rounding-less);
+}
+
+.placement-container.first {
+    background-color: #fcd703;
+}
+
+.placement-container.second {
+    background-color: #dbdbdb;
+}
+
+.placement-container.third {
+    background-color: #cc6529;
+}
+
+.placement-img {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 40px;
+
+    object-fit: cover;
+}
+
+.placement-text.points {
+    margin: 0 10px;
+}
+
+@media (max-width: 900px) {
+    .page-container {
+        flex-direction: column;
+    }
+
+    .achievements-container {
+        order: 2;
+    }
+
+    .progress-container {
+        order: 1;
+    }
+}

@@ -12,6 +12,7 @@ import Mappool from "./tournaments/tournament/mappool";
 import AchievementHeader from "../components/achievements/AchievementHeader";
 import AchievementsInfoPage from "./achievements";
 import TeamsPage from "./achievements/teams";
+import AchievementCompletionPage from "./achievements/completion";
 
 export const routes: RouteObject[] = [
   {
@@ -82,6 +83,10 @@ export const routes: RouteObject[] = [
             path: "teams",
             element: <TeamsPage />,
           },
+          {
+            path: "completion",
+            element: <AchievementCompletionPage />
+          }
         ],
       },
     ],
