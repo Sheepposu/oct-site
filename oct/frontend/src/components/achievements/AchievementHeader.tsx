@@ -1,8 +1,21 @@
 import { Link, Outlet } from "react-router-dom";
+import UpArrow from "../UpArrow";
+import DownArrow from "../DownArrow";
 
 import "src/assets/css/sub-header.css";
+import "src/assets/css/main.css";
+import { useState } from "react";
 
 export default function AchievementHeader() {
+  const [useUpArrow, setUseUpArrow] = useState(false);
+
+  const upArrow = UpArrow("mobile-sub-header-arrow" + (useUpArrow ? "" : " hide"));
+  const downArrow = DownArrow("mobile-sub-header-arrow" +(useUpArrow ? " hide": ""));
+
+  function onHeaderClicked() {
+    setUseUpArrow(!useUpArrow);
+  }
+
   return (
     <>
       <div className="sub-header">
@@ -25,16 +38,13 @@ export default function AchievementHeader() {
 
       {/* Mobile header */}
       <div className="mobile-sub-header-container prevent-select">
-        <div className="mobile-sub-header">
+        <div className="mobile-sub-header" onClick={onHeaderClicked}>
           <p className="sub-header-text">Achievement Info</p>
-          <svg id="mobile-header-arrow-down" viewBox="0 0 1 1" className="mobile-sub-header-arrow">
-            <polyline points="0.1,0.3 0.5,0.7 0.9,0.3 " fill="none" stroke="black" strokeWidth={0.1} />
-          </svg>
-          <svg id="mobile-header-arrow-up" viewBox="0 0 1 1" className="mobile-sub-header-arrow" display={"none"}>
-              <polyline points="0.1,0.7 0.5,0.3 0.9,0.7 " fill="none" stroke="black" strokeWidth={0.1} />
-          </svg>
+          {
+            useUpArrow ? upArrow : downArrow
+          }
         </div>
-        <div className="header-dropdown">
+        <div className="header-dropdown mobile-sub-header-dropdown" style={{display: useUpArrow ? "flex" : "none"}}>
           <Link to="">
             <div className="mobile-header-dropdown-item">
               <p className="mobile-header-dropdown-text">Info</p>
