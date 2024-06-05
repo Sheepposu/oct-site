@@ -3,9 +3,14 @@ from django.shortcuts import render
 
 from tournament.serializers import UserSerializer
 
+from common import get_auth_handler
+
 def index_view(request):
     if not request.user.is_authenticated:
-        return render(request, 'dist/index.html', {"data": {"isAuthenticated": False, "user": None}})
+        auth_url = get_auth_handler().get_auth_url()
+        return render(request, 'dist/index.html', {
+            "data": {"isAuthenticated": False, "user": None, "authUrl": auth_url},
+        })
     
     user_serializer = UserSerializer(request.user)
     serialized_user = user_serializer.serialize()

@@ -17,4 +17,5 @@ export type Session = {
       referee: boolean;
     };
   };
+  authUrl?: string;
 };
