@@ -8,8 +8,8 @@ from .models import *
 from .serializers import *
 
 
-def _serialize_team(team):
-    return TeamSerializer(team).serialize(include=["players.user"], exclude=["players.user.roles", "players.user.involvements"])
+def _serialize_team(team, many=False):
+    return TeamSerializer(team, many).serialize(include=["players.user"], exclude=["players.user.roles", "players.user.involvements"])
 
 
 def achievements(req):
@@ -46,7 +46,12 @@ def team(req):
         team = _serialize_team(team)
     return JsonResponse({"team": team}, safe=False)
 
-
+def teams(req):
+    teams = Team.select_with(("players.user",))
+    if teams is not None:
+        teams = _serialize_team(teams, many=True)
+    return JsonResponse({"teams": teams}, safe=False)
+    
 @require_POST
 def join_team(req):
     invite = req.POST.get("invite")
