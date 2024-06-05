@@ -8,53 +8,8 @@ from .models import *
 from .serializers import *
 
 
-def get_full_team(user_id: int | None = None, invite: str | None = None):
-    where = f"WHERE user_id = '{user_id}'" if invite is None else f"WHERE invite = '{invite}'"
-    print(where)
-    with connection.cursor() as cursor:
-        cursor.execute(
-            f"""
-            SELECT
-                achievements_team.id,
-                name,
-                icon,
-                invite,
-                achievements_player.id,
-                user_id,
-                osu_id,
-                osu_username,
-                osu_avatar,
-                osu_cover
-            FROM achievements_team
-            INNER JOIN achievements_player ON (achievements_player.team_id = achievements_team.id)
-            INNER JOIN tournament_user ON (tournament_user.id = achievements_player.user_id)
-            {where}
-            """
-        )
-
-        team = cursor.fetchall()
-        print(team)
-        if not team:
-            return
-        
-        return {
-            "id": int(team[0][0]),
-            "name": team[0][1],
-            "icon": team[0][2],
-            "invite": team[0][3],
-            "players": [
-                {
-                    "id": int(player[4]),
-                    "user": {
-                        "id": player[5],
-                        "osu_id": int(player[6]),
-                        "osu_username": player[7],
-                        "osu_avatar": player[8],
-                        "osu_cover": player[9]
-                    }
-                } for player in team
-            ]
-        }
+def _serialize_team(team):
+    return TeamSerializer(team).serialize(include=["players.user"], exclude=["players.user.roles", "players.user.involvements"])
 
 
 def achievements(req):
@@ -86,7 +41,10 @@ def team(req):
     if not req.user.is_authenticated:
         return JsonResponse({"team": None}, safe=False)
     
-    return JsonResponse({"team": get_full_team(user_id=req.user.id)}, safe=False)
+    team = Team.select_with(("players.user",), players__user_id=req.user.id)[0]
+    if team is not None:
+        team = _serialize_team(team)
+    return JsonResponse({"team": team}, safe=False)
 
 
 @require_POST
@@ -95,7 +53,7 @@ def join_team(req):
     print(invite)
     team = None
     if invite is not None:
-        team = get_full_team(invite=invite)
+        team = Team.select_with(("players.user"), invite=invite)[0]
     if team is None:
         return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
     
@@ -105,22 +63,22 @@ def join_team(req):
     
     player = Player(user=req.user, team_id=team["id"])
     player.save()
-    team["players"].append(PlayerSerializer(player).serialize())
-    return JsonResponse({"team": team}, safe=False)
+    team.players.append(player)
+    return JsonResponse({"team": _serialize_team(team)}, safe=False)
 
 
 @require_POST
 def leave_team(req):
     team = None
     if req.user.is_authenticated:
-        team = get_full_team(user_id=req.user.id)
+        team = Team.select_with(("players.user",), players__user_id=req.user.id)[0]
     if team is None:
         return JsonResponse({"error": "not on a team"}, status=400, safe=False)
     
-    with connection.cursor() as cursor:
-        cursor.execute(f"DELETE FROM achievements_player WHERE user_id = '{req.user.id}'")
-        if len(team["players"]) == 1:
-            cursor.execute(f"DELETE FROM achievements_team WHERE id = {team['id']}")
+    player = next(filter(lambda player: player.user.id == req.user.id, team.players))
+    player.delete()
+    if len(team.players) == 1:
+        team.delete()
 
     return JsonResponse({}, safe=False)
 
@@ -140,7 +98,6 @@ def create_team(req):
         team = Team(name=name, icon="", invite=invite)
         team.save()
     except Exception as e:
-        print(e)
         return JsonResponse({"error": "team name taken"}, status=400, safe=False)
     
     player = Player(user=req.user, team_id=team.id)
