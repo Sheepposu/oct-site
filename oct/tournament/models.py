@@ -168,6 +168,9 @@ class User(AbstractBaseUser, RelationCachingModel):
 
     @property
     def roles(self):
+        if not isinstance(self.involvements, list):
+            raise RuntimeError("User object does not have involvements cached")
+
         roles = {}
         for involvement in self.involvements:
             roles[involvement.tournament_iteration_id] = generate_roles_dict(involvement.roles.get_roles())
