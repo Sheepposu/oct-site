@@ -1,4 +1,9 @@
+import AnimatedPage from "src/AnimatedPage";
+
 export default function Mappool() {
-    return <div>Mappool</div>;
-  }
-  
+  return (
+    <AnimatedPage>
+      <div>Mappool</div>
+    </AnimatedPage>
+  );
+}

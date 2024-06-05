@@ -1,3 +1,5 @@
+import AnimatedPage from "src/AnimatedPage";
+
 export default function App() {
   function loginRedirect() {
     window.location.replace(
@@ -10,12 +12,14 @@ export default function App() {
   }
 
   return (
-    <div>
-      <div>lmao</div>
-      <div onClick={loginRedirect}>Login</div>
-      <div onClick={logoutRedirect}>
-        literally just so typescript doesn't yell for now
+    <AnimatedPage>
+      <div>
+        <div>lmao</div>
+        <div onClick={loginRedirect}>Login</div>
+        <div onClick={logoutRedirect}>
+          literally just so typescript doesn't yell for now
+        </div>
       </div>
-    </div>
+    </AnimatedPage>
   );
 }
