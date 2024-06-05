@@ -129,6 +129,8 @@ def _deconstruct(model, kw):
 
 
 def _get_where(model, **kwargs):
+    if len(kwargs) == 0:
+        return ""
     return "WHERE " + ",".join((
         f"{field.model._meta.db_table}."+field.column + " = %s"
         for field in map(lambda kw: _deconstruct(model, kw), kwargs.keys())
