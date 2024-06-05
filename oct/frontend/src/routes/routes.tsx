@@ -10,9 +10,8 @@ import TournamentInfo from "./tournaments/tournament";
 import Bracket from "./tournaments/tournament/bracket";
 import Mappool from "./tournaments/tournament/mappool";
 import AchievementHeader from "../components/achievements/AchievementHeader";
-import AchievementsInfoPage from "./achievements";
-import TeamsPage from "./achievements/teams";
 import AchievementCompletionPage from "./achievements/completion";
+import AchievementsIndex from "./achievements";
 
 export const routes: RouteObject[] = [
   {
@@ -77,16 +76,12 @@ export const routes: RouteObject[] = [
         children: [
           {
             index: true,
-            element: <AchievementsInfoPage />,
-          },
-          {
-            path: "teams",
-            element: <TeamsPage />,
+            element: <AchievementsIndex />,
           },
           {
             path: "completion",
-            element: <AchievementCompletionPage />
-          }
+            element: <AchievementCompletionPage />,
+          },
         ],
       },
     ],

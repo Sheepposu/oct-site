@@ -1,9 +1,12 @@
 import "src/assets/css/achievements/teams.css";
+import TeamCard from "src/components/achievements/TeamCard";
 
-export default function TeamsPage() {
+export default function TeamsCard() {
   return (
-    <div>
-      <p>le teams</p>
+    <div className="teams-container">
+      <div className="teams-outside-container">
+        <TeamCard />
+      </div>
     </div>
   );
 }
