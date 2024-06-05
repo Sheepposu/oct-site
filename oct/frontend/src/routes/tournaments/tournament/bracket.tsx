@@ -1,4 +1,9 @@
+import AnimatedPage from "src/AnimatedPage";
+
 export default function Bracket() {
-    return <div>Bracket</div>;
-  }
-  
+  return (
+    <AnimatedPage>
+      <div>Bracket</div>
+    </AnimatedPage>
+  );
+}

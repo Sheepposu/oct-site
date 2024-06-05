@@ -4,6 +4,7 @@ import TournamentCard from "src/components/TournamentCard";
 import { TournamentIterationType } from "src/api/types/TournamentIterationType";
 
 import "src/assets/css/tournaments/tournaments.css";
+import AnimatedPage from "src/AnimatedPage";
 
 export default function Tournaments() {
   const fetchTournamentsData = (): Promise<TournamentIterationType[]> =>
@@ -17,10 +18,12 @@ export default function Tournaments() {
 
   const tournaments = tournamentsQuery.data;
   return (
-    <div className="tournaments-container">
-      {tournaments?.map((tournament, index) => (
-        <TournamentCard key={index} tournament={tournament} />
-      ))}
-    </div>
+    <AnimatedPage>
+      <div className="tournaments-container">
+        {tournaments?.map((tournament, index) => (
+          <TournamentCard key={index} tournament={tournament} />
+        ))}
+      </div>
+    </AnimatedPage>
   );
 }
