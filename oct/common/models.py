@@ -25,7 +25,7 @@ def _get_columns(model, related_fields: Iterable):
     includes = _group_related_fields(related_fields)
     for field in model._meta.fields+tuple(filter(lambda f: f.one_to_many, model._meta.related_objects)):
         try:
-            include = includes[field.name]  # key error if not include
+            include = includes.pop(field.name)  # key error if not include
 
             # add join before getting next columns
             is_one_to_one = isinstance(field, ForeignKey)
@@ -41,6 +41,10 @@ def _get_columns(model, related_fields: Iterable):
         except KeyError:
             if hasattr(field, "column"):
                 columns[1].append((field, f"{model._meta.db_table}.{field.column}"))
+
+    if len(includes) != 0:
+        raise ValueError(f"Invalid field {next(iter(includes.keys()))}")
+    
     return columns, joins
 
 
@@ -65,7 +69,7 @@ def _parse_rows(rows, columns, many):
 
     row_groupings = iter_row_groupings()
     next_row_grouping_i = next(row_groupings)
-    for row_i, row in enumerate(rows):
+    for row_i in range(len(rows)):
         if row_i != next_row_grouping_i:
             continue
 
@@ -92,6 +96,10 @@ def _parse_rows(rows, columns, many):
                 values[field.name+"_id" if isinstance(field, ForeignKey) else field.name] = value
                 value_i += 1
 
+        # LEFT JOIN that returned empty columns for the query
+        if all(map(lambda value: value is None, values.values())):
+            continue
+
         obj = model(**values)
         obj._state.adding = False
         obj._state.db = "default"
@@ -101,11 +109,30 @@ def _parse_rows(rows, columns, many):
     return objs if many else (objs[0] if len(objs) > 0 else None)
 
 
+def _get_field(m, attr):
+    if attr == "pk":
+        return next(filter(lambda f: f.primary_key, m._meta.fields))
+    else:
+        return getattr(m, attr).field
+    
+
+def _deconstruct(model, kw):
+    last_model = model
+    field = _get_field(model,  kw.split("__", 1)[0])
+    for attr in kw.split("__")[1:]:
+        last_model = field.target_field.model if isinstance(field, ForeignKey) and last_model._meta.db_table != field.target_field.model._meta.db_table else field.model
+        field = _get_field(
+            last_model,
+            attr
+        )
+    return field.target_field if isinstance(field, ForeignKey) else field
+
+
 def _get_where(model, **kwargs):
-    return "WHERE " + ",".join(
-        (f"{model._meta.db_table}."+next(filter(lambda f: f.name == kw or (kw == "pk" and f.primary_key), model._meta.fields)).column + " = %s"
-         for kw in kwargs.keys())
-    ), tuple(kwargs.values())
+    return "WHERE " + ",".join((
+        f"{field.model._meta.db_table}."+field.column + " = %s"
+        for field in map(lambda kw: _deconstruct(model, kw), kwargs.keys())
+    )), tuple(kwargs.values())
 
 
 class RelationCachingModel(Model):
@@ -123,7 +150,7 @@ class RelationCachingModel(Model):
 
     # TODO: use querysets maybe
     @classmethod
-    def select_with(cls, related_fields: tuple, **kwargs):
+    def select_with(cls, related_fields: Iterable, **kwargs):
         def stringify(columns):
             return ','.join(map(lambda item: item[1] if isinstance(item[1], str) else stringify(item[1]), columns[1]))
 

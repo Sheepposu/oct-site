@@ -64,14 +64,15 @@ class Serializer:
                 data[json_name] = value
         return data
 
-    def _separate_field_args(self, fields):
+    def _separate_field_args(self, fields, only_include_last=False):
         now = []
         later = defaultdict(list)
         for field in fields:
             split = field.split(".", 1)
             if len(split) > 1:
                 later[split[0]].append(split[1])
-            now.append(split[0])
+            if not only_include_last or len(split) == 1:
+                now.append(split[0])
         return now, later
 
     def serialize(self, exclude=None, include=None):
@@ -79,7 +80,7 @@ class Serializer:
             exclude = self.excludes
         if include is None:
             include = []
-        exclude_now, exclude_later = self._separate_field_args(exclude)
+        exclude_now, exclude_later = self._separate_field_args(exclude, only_include_last=True)
         include_now, include_later = self._separate_field_args(include)
 
         fields = list(self.fields)
