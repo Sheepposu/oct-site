@@ -11,7 +11,7 @@ export default function AchievementHeader() {
 
   const arrow = (useUpArrow ? UpArrow : DownArrow)("mobile-sub-header-arrow");
 
-  function onClick() {
+  function onArrowClick() {
     setUseUpArrow(!useUpArrow);
   }
 
@@ -23,11 +23,6 @@ export default function AchievementHeader() {
             <p className="sub-header-text">Info</p>
           </div>
         </Link>
-        <Link to="team">
-          <div className="sub-header-link">
-            <p className="sub-header-text">Team</p>
-          </div>
-        </Link>
         <Link to="completion">
           <div className="sub-header-link">
             <p className="sub-header-text">Achievements</p>
@@ -37,23 +32,21 @@ export default function AchievementHeader() {
 
       {/* Mobile header */}
       <div className="mobile-sub-header-container prevent-select">
-        <div className="mobile-sub-header" onClick={onClick}>
+        <div className="mobile-sub-header" onClick={onArrowClick}>
           <p className="sub-header-text">Achievement Info</p>
-          { arrow }
+          {arrow}
         </div>
-        <div className="header-dropdown mobile-sub-header-dropdown" style={{display: useUpArrow ? "flex" : "none"}}>
+        <div
+          className="header-dropdown mobile-sub-header-dropdown"
+          style={{ display: useUpArrow ? "flex" : "none" }}
+        >
           <Link to="">
-            <div className="mobile-header-dropdown-item" onClick={onClick}>
+            <div className="mobile-header-dropdown-item" onClick={onArrowClick}>
               <p className="mobile-header-dropdown-text">Info</p>
             </div>
           </Link>
-          <Link to="team">
-            <div className="mobile-header-dropdown-item" onClick={onClick}>
-              <p className="mobile-header-dropdown-text">Team</p>
-            </div>
-          </Link>
           <Link to="completion">
-            <div className="mobile-header-dropdown-item" onClick={onClick}>
+            <div className="mobile-header-dropdown-item" onClick={onArrowClick}>
               <p className="mobile-header-dropdown-text">Achievements</p>
             </div>
           </Link>
