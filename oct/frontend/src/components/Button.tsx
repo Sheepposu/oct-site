@@ -5,6 +5,7 @@ type ButtonProps = {
   color?: string;
   textColor?: string;
   onClick?: () => void;
+  type?: "button" | "submit" | "reset";
 };
 
 export default function Button({
@@ -12,14 +13,16 @@ export default function Button({
   color = "#438efd",
   textColor = "#ffffff",
   onClick,
+  type = "button",
 }: ButtonProps) {
   return (
-    <div
+    <button
       style={{ backgroundColor: color, color: textColor }}
       className="button"
       onClick={onClick}
+      type={type}
     >
       {children}
-    </div>
+    </button>
   );
 }

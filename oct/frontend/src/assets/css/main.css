@@ -57,19 +57,6 @@ footer {
   overflow: hidden;
 }
 
-button {
-  background-color: grey;
-  height: 60px;
-  border: none;
-  border-radius: 15px;
-  box-shadow: 1px 6px 11px -3px rgba(0, 0, 0, 0.25);
-  font-weight: 700;
-  font-size: 30px;
-  font-family: "Inter", sans-serif;
-  text-align: center;
-  color: white;
-}
-
 button:hover {
   cursor: pointer;
 }
