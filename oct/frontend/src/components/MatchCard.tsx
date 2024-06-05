@@ -1,4 +1,4 @@
-import { MatchType } from "src/types/MatchType";
+import { MatchType } from "src/api/types/MatchType";
 
 import osuLogo from "src/assets/images/osu.png";
 import { useState } from "react";

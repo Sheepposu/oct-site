@@ -20,7 +20,7 @@ def achievements(req):
                 achievements_achievement.id,
                 name,
                 category,
-                COUNT(achievements_achievementcompletion.achievement_id) AS n_completed  
+                COUNT(achievements_achievementcompletion.achievement_id)
             FROM achievements_achievement
             LEFT JOIN achievements_achievementcompletion ON (achievements_achievementcompletion.achievement_id = achievements_achievement.id)
             GROUP BY achievements_achievement.id
@@ -109,4 +109,3 @@ def create_team(req):
     player["completions"] = 0
     team["players"] = [player]
     return JsonResponse(team, safe=False)
-

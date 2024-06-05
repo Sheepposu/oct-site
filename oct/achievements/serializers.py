@@ -5,7 +5,7 @@ from common import serializer
 @serializer
 class AchievementSerializer:
     model = Achievement
-    fields = ["name", "category"]
+    fields = ["id", "name", "category"]
 
 
 @serializer
@@ -17,7 +17,7 @@ class AchievementCompletionSerializer:
 @serializer
 class TeamSerializer:
     model = Team
-    fields = ["name", "icon", "invite"]
+    fields = ["id", "name", "icon", "invite"]
 
 
 @serializer

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import LoadingPlaceholder from "src/components/LoadingPlaceholder";
-import { DashboardType } from "src/types/DashboardType";
+import { DashboardType } from "src/api/types/DashboardType";
 import axios from "axios";
 import MatchCard from "src/components/MatchCard";
 

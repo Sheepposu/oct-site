@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import TournamentCard from "src/components/TournamentCard";
-import { TournamentIterationType } from "src/types/TournamentIterationType";
+import { TournamentIterationType } from "src/api/types/TournamentIterationType";
 
 import "src/assets/css/tournaments/tournaments.css";
 

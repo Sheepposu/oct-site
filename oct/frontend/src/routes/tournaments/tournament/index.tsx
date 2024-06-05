@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { Link, useParams } from "react-router-dom";
-import { TournamentInfoType } from "src/types/TournamentInfoType";
+import { TournamentInfoType } from "src/api/types/TournamentInfoType";
 
 import "src/assets/css/tournaments/tournament/index.css";
 
