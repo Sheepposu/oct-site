@@ -69,6 +69,7 @@ def join_team(req):
 
 @require_POST
 def leave_team(req):
+    # TODO: maybe make this into a postgresql function
     team = None
     if req.user.is_authenticated:
         team = Team.select_with(("players.user",), players__user_id=req.user.id)[0]
@@ -104,7 +105,7 @@ def create_team(req):
     player.save()
     
     team = TeamSerializer(team).serialize()
-    player = PlayerSerializer(player).serialize(include=["user"])
+    player = PlayerSerializer(player).serialize(include=["user"], exclude=["user.involvements", "user.roles"])
     player["completions"] = 0
     team["players"] = [player]
     return JsonResponse(team, safe=False)
