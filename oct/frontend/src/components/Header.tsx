@@ -1,12 +1,11 @@
-import { useContext } from "react";
-import { UserSessionContext } from "../UserSessionProvider";
 import { Link, Outlet } from "react-router-dom";
 
 import osuLogo from "src/assets/images/osu.png";
 import "src/assets/css/main.css";
+import { getSession } from "src/util/auth";
 
 export default function Header() {
-  const { session, loading } = useContext(UserSessionContext);
+  const session = getSession();
   return (
     <>
       <div className="header prevent-select">
@@ -37,13 +36,7 @@ export default function Header() {
         </Link>
         <div style={{ flex: 1 }}></div>
         <div>
-          {loading ? (
-            <div className="w-40 h-12 flex items-center justify-center text-white rounded-full bg-[#9f9f9f] shadow-xl select-none hover:cursor-not-allowed">
-              <p className="pr-1 text-center whitespace-nowrap w-[calc(100%-5px)] text-black flex items-center justify-center italic">
-                Loading...
-              </p>
-            </div>
-          ) : session?.isAuthenticated ? (
+          {session?.isAuthenticated ? (
             <Link to="/dashboard">
               <div className="login-box user-box">
                 <img

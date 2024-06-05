@@ -1,16 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserSessionContext } from "src/UserSessionProvider";
 import LoadingPlaceholder from "src/components/LoadingPlaceholder";
 import { DashboardType } from "src/types/DashboardType";
 import axios from "axios";
 import MatchCard from "src/components/MatchCard";
 
 import "src/assets/css/dashboard.css";
+import { getSession } from "src/util/auth";
 
 export default function Dashboard() {
-  const { session, loading } = useContext(UserSessionContext);
+  const session = getSession();
 
   const fetchDashboardData = (): Promise<DashboardType> =>
     axios.get("/api/dashboard").then((resp) => resp.data);
@@ -20,7 +19,7 @@ export default function Dashboard() {
     queryFn: fetchDashboardData,
   });
 
-  if (loading || dashboardQuery.isPending) {
+  if (dashboardQuery.isPending) {
     return <LoadingPlaceholder />;
   }
 
