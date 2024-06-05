@@ -44,13 +44,13 @@ def team(req):
     team = Team.select_with(("players.user",), players__user_id=req.user.id)[0]
     if team is not None:
         team = _serialize_team(team)
-    return JsonResponse({"team": team}, safe=False)
+    return JsonResponse(team, safe=False)
 
 def teams(req):
     teams = Team.select_with(("players.user",))
     if teams is not None:
         teams = _serialize_team(teams, many=True)
-    return JsonResponse({"teams": teams}, safe=False)
+    return JsonResponse(teams, safe=False)
     
 @require_POST
 def join_team(req):
