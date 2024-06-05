@@ -3,44 +3,93 @@
   --border-rounding-less: 10px;
   --button-color: #438efd;
   --button-color-hover: #52a1ff;
-  --box-shadow: 6px 6px 12px 3px rgba(189, 189, 189, 1);
-}
-.teams-container {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 160px);
-  width: 100vw;
-  align-items: center;
-  justify-content: center;
-}
-.teams-outside-container {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-  background-color: rgb(231, 231, 231);
-  border-radius: var(--border-rounding);
-  -moz-box-shadow: var(--box-shadow);
-  box-shadow: var(--box-shadow);
-  padding: 16px;
-}
-
-.teams-inside-container {
-  background-color: rgb(231, 231, 231);
-  width: 100%;
-  height: 100%;
-  border-radius: var(--border-rounding);
-  display: flex;
-  padding: 16px;
+  --box-shadow: 3px 3px 6px 1px rgba(189, 189, 189, 1);
 }
 
 /* teams card */
 
 .teams-card-container {
   width: 100%;
-  height: 100px;
+  height: 75px;
   background-color: rgb(255, 255, 255);
   border-radius: var(--border-rounding);
   box-shadow: var(--box-shadow);
   display: flex;
+  margin: 12px 0px 15px 0px;
+  align-items: center;
+}
+
+.teams-players-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.teams-placement {
+  background-color: red;
+  height: 100%;
+  width: 80px;
+  border-radius: var(--border-rounding);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: white;
+  font-size: xx-large;
+  margin-right: 12px;
+}
+
+.teams-icon {
+  height: 60px;
+  width: 60px;
+  min-width: 60px;
+  background-color: rgb(208, 208, 208);
+  border-radius: 100%;
+  margin-right: 6px;
+}
+
+.teams-team-name {
+  font-weight: 600;
+  font-size: larger;
+  width: 225px;
+}
+@media (max-width: 900px) {
+  .teams-placement {
+    min-width: 40px;
+    font-size: x-large;
+  }
+
+  .teams-icon {
+    margin-right: 4px;
+  }
+}
+
+@media (max-width: 500px) {
+  .teams-team-name {
+    width: 175px;
+    font-size: large;
+  }
+}
+
+.teams-divider {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.teams-points-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row-reverse;
+  width: 60px;
+  background-color: lightgray;
+  border-radius: var(--border-rounding);
+}
+
+.teams-points {
+  font-weight: bold;
+  font-size: x-large;
+  font-style: italic;
 }

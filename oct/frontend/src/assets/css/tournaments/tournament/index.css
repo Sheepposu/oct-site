@@ -6,12 +6,12 @@ body {
 
 .info-container {
   width: 90%;
-  max-width: 700px;
+  max-width: 1000px;
   border-radius: 20px;
 
   margin: auto;
   margin-top: 50px;
-  padding: 5px;
+  padding: 15px;
   text-align: center;
 
   background-color: #ffffff;

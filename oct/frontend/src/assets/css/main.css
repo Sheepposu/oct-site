@@ -57,8 +57,13 @@ footer {
   overflow: hidden;
 }
 
-button:hover {
-  cursor: pointer;
+input {
+  width: 130px;
+  height: 40px;
+  border-color: rgb(225, 225, 225);
+  border-width: 1px;
+  border-radius: 8px;
+  padding: 10px;
 }
 
 td {

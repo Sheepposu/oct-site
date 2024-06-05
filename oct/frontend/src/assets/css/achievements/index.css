@@ -1,0 +1,148 @@
+body {
+  background-color: var(--bg-color4);
+}
+
+/* Info page stuff */
+
+.index-container {
+  display: flex;
+  height: calc(100vh - 160px);
+  width: 100vw;
+  flex-direction: row;
+}
+
+.card-container {
+  height: 100%;
+  width: 50%;
+}
+
+.info-container {
+  width: 90%;
+  max-width: 800px;
+  border-radius: 20px;
+
+  margin: auto;
+  margin-top: 50px;
+  padding: 15px;
+  text-align: center;
+
+  background-color: #ffffff;
+  display: inline-block;
+}
+
+.info-title {
+  font-size: 30px;
+  font-weight: 900;
+  margin: 5px 0;
+}
+
+.info-subtitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 5px 0;
+}
+
+.info-text {
+  margin: 5px 0;
+}
+
+.info-date {
+  font-size: 10px;
+  margin-top: -5px;
+  margin-bottom: 5px;
+}
+
+.specific-container {
+  width: 300px;
+
+  padding: 5px 10px;
+  margin: 5px 10px;
+  border-radius: 20px;
+
+  background-color: var(--bg-color4);
+}
+
+.name-label {
+  font-weight: 500;
+}
+
+.info-buttons-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-your-team-container {
+  width: 100%;
+  height: 155px;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  padding: 1px 12px 12px 12px;
+  margin: 0px 0px 10px 0px;
+}
+
+.info-teams-container {
+  width: 100%;
+  height: 500px;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  padding: 12px;
+}
+
+@media (max-width: 1200px) {
+  .index-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .card-container {
+    width: 80%;
+  }
+}
+
+@media (max-width: 900px) {
+  .card-container {
+    width: 100%;
+  }
+
+  .info-container {
+    width: 100%;
+    border-radius: 0px;
+    max-width: 10000px;
+    margin-top: 0px;
+    height: 100%;
+  }
+
+  .info-teams-container {
+    height: 280px;
+  }
+}
+
+@media (max-width: 500px) {
+  .info-your-team-container {
+    height: 210px;
+  }
+
+  .info-buttons-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* broad use classes */
+
+.user-container {
+  width: 100%;
+  gap: 10px;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border: 2px solid black;
+  border-radius: 50px;
+}
