@@ -48,12 +48,16 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.getenv("DJANGO_DEBUG")))
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "oct.sheppsu.me",
-    "parched-flowers-production.up.railway.app"
-]
+
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = [
+        "localhost",
+        "127.0.0.1",
+        "oct.sheppsu.me",
+        "parched-flowers-production.up.railway.app"
+    ]
 
 
 # Application definition
