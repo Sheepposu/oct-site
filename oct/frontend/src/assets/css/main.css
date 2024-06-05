@@ -6,6 +6,13 @@
   cursor: pointer;
 }
 
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter.ttf");
+
+  font-style: normal;
+}
+
 :root {
   /* why are these all called bg color */
   --bg-color1: #438efd;
