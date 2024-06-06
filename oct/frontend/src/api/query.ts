@@ -1,5 +1,6 @@
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { AchievementExtendedType } from "./types/AchievementType";
+import { AchievementTeamType } from "./types/AchievementTeamType";
 
 
 export function useMakeQuery<T>(endpoint: string): UseQueryResult<T> {
@@ -12,4 +13,12 @@ export function useMakeQuery<T>(endpoint: string): UseQueryResult<T> {
 
 export function useGetAchievements(): UseQueryResult<AchievementExtendedType[]> {
     return useMakeQuery("achievements");
+}
+
+export function getTeam(): UseQueryResult<AchievementTeamType> {
+  return MakeQuery("achievements/team");
+}
+
+export function getTeams(): UseQueryResult<AchievementTeamType[]> {
+  return MakeQuery("achievements/teams");
 }
