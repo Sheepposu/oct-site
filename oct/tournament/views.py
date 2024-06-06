@@ -239,7 +239,8 @@ def login(req):
 def logout(req):
     if req.user.is_authenticated:
         _logout(req)
-    return redirect("index")
+        return JsonResponse({}, safe=False)
+    return JsonResponse({"error": "not logged in"}, status=403, safe=False)
 
 
 def dashboard(req):
