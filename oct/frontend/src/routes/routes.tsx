@@ -2,7 +2,6 @@ import { type RouteObject } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import Header from "src/components/Header";
 import Index from "./index";
-import Login from "./login";
 import Logout from "./logout";
 import Dashboard from "./dashboard";
 import Tournaments from "./tournaments";
@@ -21,10 +20,6 @@ export const routes: RouteObject[] = [
       {
         index: true,
         element: <Index />,
-      },
-      {
-        path: "login",
-        element: <Login />,
       },
       {
         path: "logout",
