@@ -7,10 +7,10 @@ import MatchCard from "src/components/MatchCard";
 import AnimatedPage from "src/AnimatedPage";
 
 import "src/assets/css/dashboard.css";
-import { getSession } from "src/util/auth";
+import { useSession } from "src/util/auth";
 
 export default function Dashboard() {
-  const session = getSession();
+  const session = useSession();
 
   const fetchDashboardData = (): Promise<DashboardType> =>
     axios.get("/api/dashboard").then((resp) => resp.data);

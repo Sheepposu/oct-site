@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Session } from "src/types/SessionType";
+import { Session } from "src/api/types/SessionType";
 
-export function getSession(): Session {
+export function useSession(): Session {
     const [session, setSession] = useState<Session | null>(null);
 
     if (session !== null) {

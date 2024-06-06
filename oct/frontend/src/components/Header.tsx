@@ -1,15 +1,18 @@
 import { Link, Outlet } from "react-router-dom";
 
-import osuLogo from "src/assets/images/osu.png";
-import "src/assets/css/main.css";
-import { getSession } from "src/util/auth";
+import { useSession } from "src/util/auth";
 import UpArrow from "./UpArrow";
 import DownArrow from "./DownArrow";
 import { useState } from "react";
 import Backdrop from "./Backdrop";
 
+import osuLogo from "src/assets/images/osu.png";
+
+import "src/assets/css/main.css";
+
+
 export default function Header() {
-  const session = getSession();
+  const session = useSession();
 
   const [useUpArrow, setUseUpArrow] = useState(false);
 
@@ -48,7 +51,7 @@ export default function Header() {
             <p className="header-text">Bracket</p>
           </div>
         </Link>
-        <div style={{ flex: 1 }}></div>
+        <div style={{flexGrow: 1}}></div>
         <div>
           {session.isAuthenticated ? (
             <Link to="/dashboard">
