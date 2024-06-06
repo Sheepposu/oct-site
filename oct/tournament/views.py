@@ -230,11 +230,10 @@ def login(req):
         state = req.GET.get("state", None)
         return redirect(state or "index")
     except requests.HTTPError as exc:
-        log_err(req, exc)
         return HttpResponseBadRequest()
     except Exception as exc:
         log_err(req, exc)
-    return HttpResponseServerError()
+        return HttpResponseServerError()
 
 
 def logout(req):

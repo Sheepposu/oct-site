@@ -18,5 +18,5 @@ def index_view(request):
     return render(request, 'dist/index.html', {"data": {"isAuthenticated": True, "user": serialized_user}})
 
 urlpatterns = [
-    re_path(r".*", index_view)
+    re_path(r".*", index_view, name="index")
 ]
