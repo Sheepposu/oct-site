@@ -174,8 +174,8 @@ hr {
 }
 
 .header-link-container {
-  width: 150px;
   height: 100px;
+  padding: 0 10px;
 
   display: flex;
   justify-content: center;
@@ -190,7 +190,7 @@ hr {
 
 .header-text {
   color: inherit;
-  font-size: 29px;
+  font-size: 25px;
   font-style: italic;
   font-family: "Inter", sans-serif;
 }
