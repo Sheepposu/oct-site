@@ -130,15 +130,15 @@ def create_team(req):
 
 
 def get_auth_packet(req):
-    if not req.is_authenticated:
+    if not req.user.is_authenticated:
         return HttpResponse(status=403)
     
     player = Player.objects.filter(user_id=req.user.id).first()
     if player is None:
         return JsonResponse({"error": "no associated player"}, status=400, safe=False)
     
-    packet = settings.WS_CONNECTION_VALIDATOR + struct.pack("<II", 5, random.randint(0, 0xFFFFFFFF))
-    msg = SecretBox(settings.SECRET_KEY).encrypt(packet)
+    packet = settings.WS_CONNECTION_VALIDATOR.encode("ascii") + struct.pack("<II", 5, random.randint(0, 0xFFFFFFFF))
+    msg = SecretBox(settings.SECRET_KEY[:32].encode('ascii')).encrypt(packet)
 
     return JsonResponse({
         "code": 0,

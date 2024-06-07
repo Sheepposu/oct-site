@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import { MyAchievementTeamType } from "src/api/types/AchievementTeamType";
 import { AchievementExtendedType } from "src/api/types/AchievementType";
@@ -5,6 +6,7 @@ import { SessionContext } from "src/contexts/SessionContext";
 
 class AchievementsWebsocket {
     private ws: WebSocket;
+    public authenticated: boolean = false;
 
     public constructor(uri: string) {
         this.ws = new WebSocket(uri);
@@ -14,8 +16,13 @@ class AchievementsWebsocket {
         this.ws.addEventListener("error", this.onError);
     }
 
-    private onOpen() {
+    public auth(data: object) {
+        this.authenticated = true;
+        this.ws.send(JSON.stringify(data));
+    }
 
+    private onOpen() {
+        
     }
 
     private onClose() {
@@ -34,13 +41,23 @@ class AchievementsWebsocket {
 export default function AchievementProgress({ achievements, team }: { achievements: AchievementExtendedType[] | null, team: MyAchievementTeamType | null }) {
     const session = useContext(SessionContext);
     const [ws, setWs] = useState<AchievementsWebsocket | null>(null);
-    
-    if (team === null || achievements === null) {
-        return <div>Loading team progress...</div>;
-    }
+    const { data } = useQuery({
+        queryKey: ["wsauth"],
+        queryFn: () => fetch("/api/achievements/wsauth/").then((resp) => resp.json())
+    });
 
     if (ws === null) {
-        setWs(new AchievementsWebsocket(session.wsUri));
+        const aws = new AchievementsWebsocket(session.wsUri)
+        setWs(aws);
+        if (data !== undefined) {
+            aws.auth(data);
+        }
+    } else if (!ws.authenticated && data !== undefined) {
+        ws.auth(data);
+    }
+
+    if (team === null || achievements === null) {
+        return <div>Loading team progress...</div>;
     }
 
     let achievementCount = 0;
