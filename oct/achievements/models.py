@@ -17,8 +17,8 @@ class Achievement(RelationCachingModel):
 
 
 class AchievementCompletion(RelationCachingModel):
-    player = models.ForeignKey("Player", on_delete=models.RESTRICT)
-    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
+    player = models.ForeignKey("Player", on_delete=models.RESTRICT, related_name="completions")
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE, related_name="completions")
     time_completed = models.DateTimeField()
     
     

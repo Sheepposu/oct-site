@@ -1,56 +1,44 @@
-import { useGetAchievements } from "src/api/query";
+import { useGetAchievements, useGetTeam } from "src/api/query";
 import { AchievementExtendedType } from "src/api/types/AchievementType";
+import AchievementContainer from "src/components/achievements/AchievementContainer";
+import AchievementLeaderboard from "src/components/achievements/AchievementLeaderboard";
+import AchievementProgress from "src/components/achievements/AchievementProgress";
+import { useSession } from "src/util/auth";
+
 import "src/assets/css/achievements/completion.css";
-import Achievement from "src/components/achievements/Achievement";
 
-export default function AchievementCompletionPage() {
-    // const session = useSession();
+function LimitedAchievementCompletionPage({ achievements }: { achievements: AchievementExtendedType[] | null }) {
+    return (
+        <div className="page-container">
+            <AchievementContainer achievements={achievements} team={ null } />
+            <div className="progress-container">
+                <AchievementLeaderboard />
+            </div>
+        </div>
+    );
+}
 
-    // if (!session.isAuthenticated) {
-    //     return (
-    //         <div>Login to view this page</div>
-    //     );
-    // }
-
-    const { data, status } = useGetAchievements();
-
-    function* generateAchievements(achievements: AchievementExtendedType[]) {
-        for (const achievement of achievements) {
-            yield Achievement(achievement);
-        }
-    }
+function FullAchievementCompletionPage({ achievements }: { achievements: AchievementExtendedType[] | null }) {
+    // TODO: handle errors
+    const { data } = useGetTeam();
 
     return (
         <div className="page-container">
-            <div className="achievements-container">
-                {status === "success" ? generateAchievements(data) : <div>Loading...</div>}
-            </div>
-
+            <AchievementContainer achievements={achievements} team={data ?? null} />
             <div className="progress-container">
-                <div className="total-achievements-container">
-                    <div className="total-achievements-inner-container">
-                        <h1>Total Achievements</h1>
-                        <h1>15/24</h1>
-                        <div className="progress-bar">
-                            <div className="progress-bar-inner"></div>
-                        </div>
-                    </div>
-                    <button id="submit-button">Submit</button>
-                </div>
-                <div className="leaderboard">
-                    <h1>Leaderboard</h1>
-                    <div className="leaderboard-entry">
-                        <div className="leaderboard-foreground-container">
-                            <div className="placement-container first">
-                                <p className="placement-text">#1</p>
-                            </div>
-                            <img className="placement-img" src="https://a.ppy.sh/14895608?1686006091.jpeg"></img>
-                            <p className="placement-text">This Is A Super Long Team Name</p>
-                        </div>
-                        <h1 className="placement-text points">8</h1>
-                    </div>
-                </div>
+                <AchievementProgress achievements={achievements} team={data ?? null} />
+                <AchievementLeaderboard />
             </div>
         </div>
+    );
+}
+
+export default function AchievementCompletionPage() {
+    const session = useSession();
+    // TODO: handle errors
+    const { data } = useGetAchievements();
+
+    return (session.isAuthenticated ? FullAchievementCompletionPage : LimitedAchievementCompletionPage)(
+        {achievements: data ?? null}
     );
 }

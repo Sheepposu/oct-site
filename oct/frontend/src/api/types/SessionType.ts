@@ -17,5 +17,6 @@ export type Session = {
       referee: boolean;
     };
   };
-  authUrl?: string;
+  authUrl: string;
+  wsUri: string;
 };

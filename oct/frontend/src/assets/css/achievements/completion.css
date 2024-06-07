@@ -63,6 +63,10 @@ p {
     background: linear-gradient(to left, #5afa4b, white 150px);
 }
 
+.achievement-info-container.incomplete {
+    background: linear-gradient(to left, #fa4b4b, white 150px);
+}
+
 .achievement-info {
     flex-grow: 1;
 

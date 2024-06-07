@@ -65,7 +65,7 @@ export default function Header() {
               </div>
             </Link>
           ) : (
-            <Link to={session.authUrl ?? ""}>
+            <Link to={session.authUrl}>
               <div className="login-box shadow">
                 <img src={osuLogo} alt="osu logo" className="login-pic" />
                 <p className="login-text">Log In</p>

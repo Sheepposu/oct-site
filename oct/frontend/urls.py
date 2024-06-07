@@ -1,21 +1,25 @@
 from django.urls import re_path
 from django.shortcuts import render
+from django.conf import settings
 
 from tournament.serializers import UserSerializer
 
 from common import get_auth_handler
 
-def index_view(request):
-    if not request.user.is_authenticated:
-        auth_url = get_auth_handler().get_auth_url()
-        return render(request, 'dist/index.html', {
-            "data": {"isAuthenticated": False, "user": None, "authUrl": auth_url},
-        })
-    
-    user_serializer = UserSerializer(request.user)
-    serialized_user = user_serializer.serialize()
+def index_view(req):
+    context = {
+        "data": {
+            "isAuthenticated": req.user.is_authenticated,
+            "user": None,
+            "authUrl": settings.OSU_AUTH_URL,
+            "wsUri": settings.ACHIEVEMENTS_WS_URI
+        }
+    }
 
-    return render(request, 'dist/index.html', {"data": {"isAuthenticated": True, "user": serialized_user}})
+    if req.user.is_authenticated:
+        context["data"]["user"] = UserSerializer(req.user).serialize()
+
+    return render(req, 'dist/index.html', context)
 
 urlpatterns = [
     re_path(r".*", index_view, name="index")

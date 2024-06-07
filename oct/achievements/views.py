@@ -1,15 +1,22 @@
 from django.db import connection
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
+from django.conf import settings
 
 import secrets
+import struct
+import random
+import base64
+from nacl.secret import SecretBox
 
 from .models import *
 from .serializers import *
 
 
-def _serialize_team(team, many=False):
-    return TeamSerializer(team, many).serialize(include=["players.user"], exclude=["players.user.roles", "players.user.involvements"])
+def _serialize_team(team, many=False, include=None):
+    if include is None:
+        include = []
+    return TeamSerializer(team, many).serialize(include=["players.user"]+include, exclude=["players.user.roles", "players.user.involvements"])
 
 
 def achievements(req):
@@ -27,30 +34,36 @@ def achievements(req):
             """
         )
         return JsonResponse(
-            [{
+            {"data": [{
                 "id": int(achievement[0]),
                 "name": achievement[1],
                 "category": achievement[2],
                 "completions": achievement[3]
-            } for achievement in cursor.fetchall()],
+            } for achievement in cursor.fetchall()]},
             safe=False
         )
 
 
 def team(req):
     if not req.user.is_authenticated:
-        return JsonResponse({"team": None}, safe=False)
+        return JsonResponse({"data": None}, safe=False)
     
-    team = Team.select_with(("players.user",), players__user_id=req.user.id)[0]
+    team = Team.select_with((
+        "players.user",
+        "players.completions"
+    ), players__user_id=req.user.id)
     if team is not None:
-        team = _serialize_team(team)
-    return JsonResponse(team, safe=False)
+        team = _serialize_team(team[0], include=[
+            "players.completions",
+            "players.completions.achievement_id"
+        ])
+    return JsonResponse({"data": team}, safe=False)
 
 def teams(req):
     teams = Team.select_with(("players.user",))
     if teams is not None:
         teams = _serialize_team(teams, many=True)
-    return JsonResponse(teams, safe=False)
+    return JsonResponse({"data": teams}, safe=False)
     
 @require_POST
 def join_team(req):
@@ -69,7 +82,7 @@ def join_team(req):
     player = Player(user=req.user, team_id=team["id"])
     player.save()
     team.players.append(player)
-    return JsonResponse({"team": _serialize_team(team)}, safe=False)
+    return JsonResponse({"data": _serialize_team(team)}, safe=False)
 
 
 @require_POST
@@ -86,7 +99,7 @@ def leave_team(req):
     if len(team.players) == 1:
         team.delete()
 
-    return JsonResponse({}, safe=False)
+    return JsonResponse({"data": None}, safe=False)
 
 
 @require_POST
@@ -113,4 +126,22 @@ def create_team(req):
     player = PlayerSerializer(player).serialize(include=["user"], exclude=["user.involvements", "user.roles"])
     player["completions"] = 0
     team["players"] = [player]
-    return JsonResponse(team, safe=False)
+    return JsonResponse({"data": team}, safe=False)
+
+
+def get_auth_packet(req):
+    if not req.is_authenticated:
+        return HttpResponse(status=403)
+    
+    player = Player.objects.filter(user_id=req.user.id).first()
+    if player is None:
+        return JsonResponse({"error": "no associated player"}, status=400, safe=False)
+    
+    packet = settings.WS_CONNECTION_VALIDATOR + struct.pack("<II", 5, random.randint(0, 0xFFFFFFFF))
+    msg = SecretBox(settings.SECRET_KEY).encrypt(packet)
+
+    return JsonResponse({
+        "code": 0,
+        "data": base64.b64encode(msg.ciphertext).decode("ascii"),
+        "nonce": base64.b64encode(msg.nonce).decode("ascii")
+    }, safe=False)
