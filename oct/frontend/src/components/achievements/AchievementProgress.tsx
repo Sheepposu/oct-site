@@ -1,5 +1,7 @@
+import { useContext, useState } from "react";
 import { MyAchievementTeamType } from "src/api/types/AchievementTeamType";
 import { AchievementExtendedType } from "src/api/types/AchievementType";
+import { SessionContext } from "src/contexts/SessionContext";
 
 class AchievementsWebsocket {
     private ws: WebSocket;
@@ -30,8 +32,15 @@ class AchievementsWebsocket {
 }
 
 export default function AchievementProgress({ achievements, team }: { achievements: AchievementExtendedType[] | null, team: MyAchievementTeamType | null }) {
+    const session = useContext(SessionContext);
+    const [ws, setWs] = useState<AchievementsWebsocket | null>(null);
+    
     if (team === null || achievements === null) {
         return <div>Loading team progress...</div>;
+    }
+
+    if (ws === null) {
+        setWs(new AchievementsWebsocket(session.wsUri));
     }
 
     let achievementCount = 0;

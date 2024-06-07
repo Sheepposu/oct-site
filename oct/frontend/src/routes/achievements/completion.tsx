@@ -3,9 +3,10 @@ import { AchievementExtendedType } from "src/api/types/AchievementType";
 import AchievementContainer from "src/components/achievements/AchievementContainer";
 import AchievementLeaderboard from "src/components/achievements/AchievementLeaderboard";
 import AchievementProgress from "src/components/achievements/AchievementProgress";
-import { useSession } from "src/util/auth";
 
 import "src/assets/css/achievements/completion.css";
+import { useContext } from "react";
+import { SessionContext } from "src/contexts/SessionContext";
 
 function LimitedAchievementCompletionPage({ achievements }: { achievements: AchievementExtendedType[] | null }) {
     return (
@@ -34,7 +35,7 @@ function FullAchievementCompletionPage({ achievements }: { achievements: Achieve
 }
 
 export default function AchievementCompletionPage() {
-    const session = useSession();
+    const session = useContext(SessionContext);
     // TODO: handle errors
     const { data } = useGetAchievements();
 

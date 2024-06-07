@@ -1,18 +1,18 @@
 import { Link, Outlet } from "react-router-dom";
 
-import { useSession } from "src/util/auth";
 import UpArrow from "./UpArrow";
 import DownArrow from "./DownArrow";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Backdrop from "./Backdrop";
 
 import osuLogo from "src/assets/images/osu.png";
 
 import "src/assets/css/main.css";
+import { SessionContext } from "src/contexts/SessionContext";
 
 
 export default function Header() {
-  const session = useSession();
+  const session = useContext(SessionContext);
 
   const [useUpArrow, setUseUpArrow] = useState(false);
 
