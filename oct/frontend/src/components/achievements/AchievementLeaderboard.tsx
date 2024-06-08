@@ -1,7 +1,7 @@
 import { useGetTeams } from "src/api/query";
 import { AchievementTeamType } from "src/api/types/AchievementTeamType";
 
-function AchievementEntry(team: AchievementTeamType, placement: number) {
+function AchievementEntry({team, placement}: {team: AchievementTeamType, placement: number}) {
     const icon = team.icon === null || team.icon === "" ? "https://osu.ppy.sh/images/layout/avatar-guest@2x.png" : team.icon;
     const placementCls = "placement-container" + ([" first", " second", " third"][placement-1] ?? "");
     return (
@@ -18,25 +18,18 @@ function AchievementEntry(team: AchievementTeamType, placement: number) {
     );
 }
 
-function* generateEntries(teams: AchievementTeamType[] | null) {
-    if (teams === null) {
-        yield <div>Error occurred</div>;
-        return;
-    }
-
-    for (let i=0; i<teams.length; i++) {
-        yield AchievementEntry(teams[i], i+1);
-    }
-}
-
 export default function AchievementLeaderboard() {
     // TODO: check for errors
-    const { isPending, data } = useGetTeams();
+    const { isSuccess, isPending, data } = useGetTeams();
 
     return (
         <div className="leaderboard">
             <h1>Leaderboard</h1>
-            {isPending ? <div>Loading...</div> : generateEntries(data as AchievementTeamType[] | null)}
+            {
+                isPending ? <div>Loading...</div> : 
+                (isSuccess ? data?.map((team, index) => <AchievementEntry key={index} team={team} placement={index+1} />) : 
+                <div>Error</div>)
+            }
         </div>
     );
 }

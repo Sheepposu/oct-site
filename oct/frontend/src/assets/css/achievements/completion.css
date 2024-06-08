@@ -3,6 +3,7 @@
     --border-rounding-less: 10px;
     --button-color: #438efd;
     --button-color-hover: #52a1ff;
+    --button-color-disabled: #20457d;
 }
 
 h1 {
@@ -127,7 +128,7 @@ p {
     background-color: var(--bg-color1);
 }
 
-#submit-button {
+.submit-button {
     height: 50px;
     padding: 5px 10px;
     margin: 0 10px;
@@ -136,8 +137,16 @@ p {
     transition: background-color 0.2s;
 }
 
-#submit-button:hover {
+.submit-button.disabled {
+    background-color: var(--button-color-disabled);
+}
+
+.submit-button:hover {
     background-color: var(--button-color-hover);
+}
+
+.submit-button.disabled:hover {
+    background-color: var(--button-color-disabled);
 }
 
 .leaderboard {
@@ -145,6 +154,7 @@ p {
 
     display: flex;
     flex-direction: column;
+    gap: 5px;
 
     border-radius: var(--border-rounding);
 

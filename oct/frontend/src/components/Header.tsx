@@ -2,19 +2,34 @@ import { Link, Outlet } from "react-router-dom";
 
 import UpArrow from "./UpArrow";
 import DownArrow from "./DownArrow";
-import { useContext, useState } from "react";
+import { useContext, useReducer, useState } from "react";
 import Backdrop from "./Backdrop";
 
 import osuLogo from "src/assets/images/osu.png";
 
 import "src/assets/css/main.css";
 import { SessionContext } from "src/contexts/SessionContext";
+import ErrorContainer from "./ErrorContainer";
+import { ErrorContext } from "src/contexts/ErrorContext";
+import { ErrorState } from "./ErrorEntry";
 
+function errorReducer(errors: ErrorState[], errorMsg: string) {
+  console.log(errors, errorMsg);
+  if (errorMsg === "") {
+    return errors.slice(1);
+  }
+  const now = Date.now();
+  return errors.concat([{
+    msg: errorMsg,
+    createdAt: now,
+    expiresAt: now + 10000,
+  }]);
+}
 
 export default function Header() {
   const session = useContext(SessionContext);
-
   const [useUpArrow, setUseUpArrow] = useState(false);
+  const [errors, dispatchError] = useReducer(errorReducer, []);
 
   const arrow = (useUpArrow ? UpArrow : DownArrow)("mobile-header-arrow")
   const backdrop = Backdrop(useUpArrow, setUseUpArrow);
@@ -120,9 +135,14 @@ export default function Header() {
           </Link>
         </div>
       </div>
-      { backdrop }
 
-      <Outlet />
+      { backdrop }
+      
+      <ErrorContext.Provider value={dispatchError}>
+        <ErrorContainer errors={errors} />
+        <Outlet />
+      </ErrorContext.Provider>
+      
     </>
   );
 }

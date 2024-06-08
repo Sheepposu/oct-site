@@ -345,3 +345,43 @@ hr {
 .popup-button {
   margin: 0 5px;
 }
+
+/* Error container */
+
+.error-container {
+  height: 100vh;
+  width: 50%;
+  max-width: 300px;
+  padding: 10px;
+
+  position: absolute;
+
+  right: 0;
+  top: 0;
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  gap: 5px;
+}
+
+.error-entry {
+  width: 100%;
+  padding: 5px;
+
+  border-radius: 10px;
+
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.error-text {
+  font-size: 15px;
+}
+
+.error-bar {
+  height: 5px;
+
+  background-color: rgb(62, 148, 235);
+
+  transition: width 0.1s linear;
+}

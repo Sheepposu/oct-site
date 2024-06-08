@@ -1,6 +1,8 @@
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { AchievementExtendedType } from "./types/AchievementType";
 import { AchievementTeamType, MyAchievementTeamType } from "./types/AchievementTeamType";
+import { useContext } from "react";
+import { ErrorContext } from "src/contexts/ErrorContext";
 
 
 function getUrl(endpoint: string): string {
@@ -10,14 +12,15 @@ function getUrl(endpoint: string): string {
 }
 
 export function useMakeQuery<T>(endpoint: string): UseQueryResult<T | null> {
-  return useQuery({queryKey: [endpoint], queryFn: () => {
-    return fetch(getUrl(endpoint)).then((resp) => resp.json().then((data) => {
-      if (data.error !== undefined) {
-        console.log(data.error)
-        return null;
-      }
-      return data.data;
-    }));
+  const dispatchError = useContext(ErrorContext);
+  return useQuery({queryKey: [endpoint], queryFn: async () => {
+    const resp = await fetch(getUrl(endpoint));
+    if (resp.status !== 200) {
+      dispatchError(`Error fetching ${endpoint}... try refreshing`);
+      console.log(`Error fetching ${endpoint}: `, resp.text);
+      return null;
+    }
+    return (await resp.json()).data;
   }});
 }
 
