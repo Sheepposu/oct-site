@@ -5,58 +5,66 @@ import { AchievementExtendedType } from "src/api/types/AchievementType";
 import { ErrorContext } from "src/contexts/ErrorContext";
 import { SessionContext } from "src/contexts/SessionContext";
 
-class AchievementsWebsocket {
-    private ws: WebSocket;
-    private dispatchError: React.Dispatch<string>;
-    private data: string;
-    public authenticated: boolean = false;
+type WebsocketState = {
+    ws: WebSocket;
+    dispatchError: React.Dispatch<string>;
+    onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>;
+    authenticated: boolean;
+};
 
-    public constructor(uri: string, dispatchError: React.Dispatch<string>, data: string) {
-        this.ws = new WebSocket(uri);
-        this.dispatchError = dispatchError;
-        this.data = data;
+function connect(uri: string, dispatchError: React.Dispatch<string>, data: object, onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>): WebsocketState {
+    const ws = new WebSocket(uri);
 
-        const self = this as AchievementsWebsocket;
-        this.ws.addEventListener("open", (evt) => self.onOpen(evt));
-        this.ws.addEventListener("close", (evt) => self.onClose(evt));
-        this.ws.addEventListener("message", (evt) => self.onMessage(evt));
-        this.ws.addEventListener("error", (evt) => self.onError(evt));
-    }
+    const state: WebsocketState = {
+        ws,
+        dispatchError,
+        onMutation,
+        authenticated: false
+    };
 
-    public close() {
-        this.ws.close();
-    }
-
-    private onOpen(evt: Event) {
+    ws.addEventListener("open", (evt) => {
         console.log(evt);
-        this.ws.send(JSON.stringify(this.data));
-        this.dispatchError("the ws connection has opened");
+        ws.send(JSON.stringify(data))
+    });
+    ws.addEventListener("close", (evt) => {
+        console.log(evt);
+        dispatchError("Connection to submissions server unexpectedly closed")
+        state.authenticated = false;
+        onMutation({...state});
+    });
+    ws.addEventListener("error", (evt) => {
+        console.log(evt);
+        dispatchError(`Submission server returned an unexpected error`)
+    });
+    ws.addEventListener("message", (evt) => {
+        console.log(evt);
+        onOpen(evt, state)
+    });
+
+    onMutation({...state});
+    return state;
+}
+
+// function closeConnection(state: WebsocketState) {
+//     state.ws.close();
+// }
+
+function onOpen(evt: MessageEvent<string>, state: WebsocketState) {
+    const data = JSON.parse(evt.data);
+    if (data.error !== undefined) {
+        state.dispatchError(`Unexpected error from submission server: ${data.error}`);
+        return;
     }
 
-    private onClose(evt: CloseEvent) {
-        console.log(evt);
-        this.dispatchError("the ws connect as closed");
-    }
-
-    private onMessage(evt: MessageEvent<string>) {
-        console.log(evt);
-        this.dispatchError("message received "+evt.data);
-
-        const data = JSON.parse(evt.data);
-        if (data.code === 0) {
-            this.authenticated = true;
-        }
-    }
-
-    private onError(evt: Event) {
-        console.log(evt);
-        this.dispatchError("a ws error occurred");
+    if (data.code == 0) {
+        state.authenticated = true;
+        state.onMutation({...state});
     }
 }
 
 export default function AchievementProgress({ achievements, team }: { achievements: AchievementExtendedType[] | null, team: MyAchievementTeamType | null }) {
     const session = useContext(SessionContext);
-    const [ws, setWs] = useState<AchievementsWebsocket | null>(null);
+    const [state, setState] = useState<WebsocketState | null>(null);
     const { data } = useQuery({
         queryKey: ["wsauth"],
         queryFn: () => fetch("/api/achievements/wsauth/").then((resp) => resp.json())
@@ -68,12 +76,12 @@ export default function AchievementProgress({ achievements, team }: { achievemen
             return;
         }
 
-        const aws = new AchievementsWebsocket(session.wsUri, dispatchError, data);
-        setWs(aws);
-        return () => {
-            aws.close();
+        if (state !== null) {
+            return;
         }
-    }, [session.wsUri, dispatchError, data]);
+
+        connect(session.wsUri, dispatchError, data, setState);
+    }, [session.wsUri, dispatchError, data, state]);
 
     if (team === null || achievements === null) {
         return <div>Loading team progress...</div>;
@@ -84,7 +92,7 @@ export default function AchievementProgress({ achievements, team }: { achievemen
         achievementCount += player.completions.length;
     }
     
-    const submitCls = "submit-button" + (ws === null ? " disabled" : "");
+    const submitCls = "submit-button" + (state === null || !state.authenticated ? " disabled" : "");
 
     return (
         <div className="total-achievements-container">

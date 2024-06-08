@@ -14,7 +14,6 @@ import { ErrorContext } from "src/contexts/ErrorContext";
 import { ErrorState } from "./ErrorEntry";
 
 function errorReducer(errors: ErrorState[], errorMsg: string) {
-  console.log(errors, errorMsg);
   if (errorMsg === "") {
     return errors.slice(1);
   }
