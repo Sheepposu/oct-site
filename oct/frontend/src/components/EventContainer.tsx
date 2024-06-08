@@ -1,8 +1,9 @@
 import "src/assets/css/main.css";
-import ErrorEntry, { ErrorState } from "./ErrorEntry";
+import ErrorEntry from "./EventEntry";
 import { useEffect, useState } from "react";
+import { EventState } from "src/contexts/EventContext";
 
-export default function ErrorContainer({errors}: {errors: ErrorState[]}) {
+export default function EventContainer({events}: {events: EventState[]}) {
     const [time, setTime] = useState(Date.now());
 
     useEffect(() => {
@@ -11,8 +12,8 @@ export default function ErrorContainer({errors}: {errors: ErrorState[]}) {
     });
 
     return (
-        <div className="error-container">
-            {errors.map((error, index) => <ErrorEntry key={index} error={error} time={time} />)}
+        <div className="event-container">
+            {events.map((event, index) => <ErrorEntry key={index} event={event} time={time} />)}
         </div>
     );
 }

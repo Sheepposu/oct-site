@@ -129,9 +129,10 @@ p {
 }
 
 .submit-button {
-    height: 50px;
     padding: 5px 10px;
     margin: 0 10px;
+
+    border-radius: 5px;
 
     background-color: var(--button-color);
     transition: background-color 0.2s;
@@ -142,10 +143,12 @@ p {
 }
 
 .submit-button:hover {
+    cursor: pointer;
     background-color: var(--button-color-hover);
 }
 
 .submit-button.disabled:hover {
+    cursor: default;
     background-color: var(--button-color-disabled);
 }
 

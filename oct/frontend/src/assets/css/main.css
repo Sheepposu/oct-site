@@ -348,8 +348,7 @@ hr {
 
 /* Error container */
 
-.error-container {
-  height: 100vh;
+.event-container {
   width: 50%;
   max-width: 300px;
   padding: 10px;
@@ -357,7 +356,7 @@ hr {
   position: absolute;
 
   right: 0;
-  top: 0;
+  bottom: 0;
   
   display: flex;
   flex-direction: column;
@@ -365,7 +364,7 @@ hr {
   gap: 5px;
 }
 
-.error-entry {
+.event-entry {
   width: 100%;
   padding: 5px;
 
@@ -374,11 +373,19 @@ hr {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-.error-text {
+.event-entry.error {
+  border: 2px solid rgb(224, 78, 78);
+}
+
+.event-entry.info {
+  border: 2px solid rgb(87, 131, 244);
+}
+
+.event-text {
   font-size: 15px;
 }
 
-.error-bar {
+.event-bar {
   height: 5px;
 
   background-color: rgb(62, 148, 235);

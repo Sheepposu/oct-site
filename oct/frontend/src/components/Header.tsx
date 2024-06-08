@@ -9,17 +9,19 @@ import osuLogo from "src/assets/images/osu.png";
 
 import "src/assets/css/main.css";
 import { SessionContext } from "src/contexts/SessionContext";
-import ErrorContainer from "./ErrorContainer";
-import { ErrorContext } from "src/contexts/ErrorContext";
-import { ErrorState } from "./ErrorEntry";
+import ErrorContainer from "./EventContainer";
+import { EventContext, EventState, EventStateType } from "src/contexts/EventContext";
 
-function errorReducer(errors: ErrorState[], errorMsg: string) {
-  if (errorMsg === "") {
-    return errors.slice(1);
+function errorReducer(events: EventState[], {type, msg}: {type: EventStateType, msg: string}) {
+  if (msg === "") {
+    // TODO: add to some log where it can be accessed by the user to view past events
+    return events.slice(1);
   }
+
   const now = Date.now();
-  return errors.concat([{
-    msg: errorMsg,
+  return events.concat([{
+    type,
+    msg,
     createdAt: now,
     expiresAt: now + 10000,
   }]);
@@ -28,7 +30,7 @@ function errorReducer(errors: ErrorState[], errorMsg: string) {
 export default function Header() {
   const session = useContext(SessionContext);
   const [useUpArrow, setUseUpArrow] = useState(false);
-  const [errors, dispatchError] = useReducer(errorReducer, []);
+  const [errors, dispatchEventMsg] = useReducer(errorReducer, []);
 
   const arrow = (useUpArrow ? UpArrow : DownArrow)("mobile-header-arrow")
   const backdrop = Backdrop(useUpArrow, setUseUpArrow);
@@ -137,10 +139,10 @@ export default function Header() {
 
       { backdrop }
       
-      <ErrorContext.Provider value={dispatchError}>
-        <ErrorContainer errors={errors} />
+      <EventContext.Provider value={dispatchEventMsg}>
+        <ErrorContainer events={errors} />
         <Outlet />
-      </ErrorContext.Provider>
+      </EventContext.Provider>
       
     </>
   );
