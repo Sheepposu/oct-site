@@ -19,7 +19,7 @@ function LimitedAchievementCompletionPage({ achievements }: { achievements: Achi
     );
 }
 
-function FullAchievementCompletionPage({ achievements }: { achievements: AchievementExtendedType[] | null }) {
+function FullAchievementCompletionPage({ achievements, achievementsRefetch }: { achievements: AchievementExtendedType[] | null, achievementsRefetch: () => void }) {
     // TODO: handle errors
     const { data } = useGetTeam();
 
@@ -36,10 +36,9 @@ function FullAchievementCompletionPage({ achievements }: { achievements: Achieve
 
 export default function AchievementCompletionPage() {
     const session = useContext(SessionContext);
-    // TODO: handle errors
-    const { data } = useGetAchievements();
+    const { data, refetch } = useGetAchievements();
 
     return (session.isAuthenticated ? FullAchievementCompletionPage : LimitedAchievementCompletionPage)(
-        {achievements: data ?? null}
+        {achievements: data ?? null, achievementsRefetch: refetch}
     );
 }

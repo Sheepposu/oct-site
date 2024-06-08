@@ -1,4 +1,4 @@
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { UndefinedInitialDataOptions, UseQueryResult, useQuery } from "@tanstack/react-query";
 import { AchievementExtendedType } from "./types/AchievementType";
 import { AchievementTeamType, MyAchievementTeamType } from "./types/AchievementTeamType";
 import { useContext } from "react";
@@ -11,7 +11,7 @@ function getUrl(endpoint: string): string {
   return "/api"+endpoint;
 }
 
-export function useMakeQuery<T>(endpoint: string): UseQueryResult<T | null> {
+export function useMakeQuery<T>(endpoint: string, options: object = {}): UseQueryResult<T | null> {
   const dispatchEventMsg = useContext(EventContext);
   return useQuery({queryKey: [endpoint], queryFn: async () => {
     const resp = await fetch(getUrl(endpoint));
@@ -21,7 +21,7 @@ export function useMakeQuery<T>(endpoint: string): UseQueryResult<T | null> {
       return null;
     }
     return (await resp.json()).data;
-  }});
+  }, ...options});
 }
 
 // export async function makeQuery<T>(endpoint: string): Promise<T | null> {
@@ -39,7 +39,7 @@ export function useMakeQuery<T>(endpoint: string): UseQueryResult<T | null> {
 // }
 
 export function useGetAchievements(): UseQueryResult<AchievementExtendedType[] | null> {
-  return useMakeQuery("achievements");
+  return useMakeQuery("achievements", { refetchInterval: 60000 });
 }
 
 // export async function getTeam(): Promise<MyAchievementTeamType | null> {

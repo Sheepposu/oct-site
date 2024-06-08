@@ -1,8 +1,6 @@
 import { useContext, useEffect } from "react";
 import { EventContext, EventState } from "src/contexts/EventContext";
 
-
-
 export default function EventEntry({event, time}: {event: EventState, time: number}) {
     const eventLength = event.expiresAt - event.createdAt;
     const expiresIn = Math.max(event.expiresAt - time, 0);
