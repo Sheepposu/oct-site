@@ -101,10 +101,11 @@ def leave_team(req):
     player = next(filter(lambda player: player.user.id == req.user.id, team.players))
     
 
-    _team = Team.select_with(("players.user",), id=team.id)[0]
-    if len(_team.players) == 1:
+    team_with_players = Team.select_with(("players",), id=team.id)[0]
+    if len(team_with_players.players) == 1:
         team.delete()
-    player.delete()
+    else:
+        player.delete()
     return JsonResponse({"data": None}, safe=False)
 
 
