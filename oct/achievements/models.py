@@ -9,6 +9,7 @@ class Team(RelationCachingModel):
     name = models.CharField(max_length=32, unique=True)
     icon = models.CharField(max_length=64, null=True)
     invite = models.CharField(max_length=16)
+    points = models.PositiveIntegerField(default=0)
     
 
 class Achievement(RelationCachingModel):
