@@ -21,13 +21,18 @@ function LimitedAchievementCompletionPage({ achievements }: { achievements: Achi
 
 function FullAchievementCompletionPage({ achievements, achievementsRefetch }: { achievements: AchievementExtendedType[] | null, achievementsRefetch: () => void }) {
     // TODO: handle errors
-    const { data } = useGetTeam();
+    const { data, refetch } = useGetTeam();
+
+    const refetchAll = () => {
+        achievementsRefetch();
+        refetch();
+    };
 
     return (
         <div className="page-container">
             <AchievementContainer achievements={achievements} team={data ?? null} />
             <div className="progress-container">
-                <AchievementProgress achievements={achievements} team={data ?? null} />
+                <AchievementProgress achievements={achievements} refetch={refetchAll} team={data ?? null} />
                 <AchievementLeaderboard />
             </div>
         </div>

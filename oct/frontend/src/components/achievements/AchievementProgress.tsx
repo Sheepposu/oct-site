@@ -9,18 +9,18 @@ type WebsocketState = {
     ws: WebSocket;
     dispatchEventMsg: React.Dispatch<{type: EventStateType, msg: string}>;
     onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>;
-    achievementsRefetch: () => void;
+    refetch: () => void;
     authenticated: boolean;
 };
 
-function connect(uri: string, dispatchEventMsg: React.Dispatch<{type: EventStateType, msg: string}>, data: object, onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>, achievementsRefetch: () => void): WebsocketState {
+function connect(uri: string, dispatchEventMsg: React.Dispatch<{type: EventStateType, msg: string}>, data: object, onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>, refetch: () => void): WebsocketState {
     const ws = new WebSocket(uri);
 
     const state: WebsocketState = {
         ws,
         dispatchEventMsg,
         onMutation,
-        achievementsRefetch,
+        refetch,
         authenticated: false
     };
 
@@ -79,11 +79,12 @@ function onOpen(evt: MessageEvent<string>, state: WebsocketState) {
             const achievements = data.achievements as WSAchievementType[];
             const msg = achievements.length === 0 ?
                 "No achievements completed" :
-                `You completed ${achievements.length} achievements! ${achievements.map((achievement) => achievement.name).join(", ")}`;
+                `You completed ${achievements.length} achievement(s)! ${achievements.map((achievement) => achievement.name).join(", ")}`;
             state.dispatchEventMsg({type: "info", msg: msg});
             
             if (achievements.length > 0) {
-                state.achievementsRefetch();
+                console.log(achievements);
+                state.refetch();
             }
             
             break;
@@ -91,7 +92,7 @@ function onOpen(evt: MessageEvent<string>, state: WebsocketState) {
     }
 }
 
-export default function AchievementProgress({ achievements, achievementsRefetch, team }: { achievements: AchievementExtendedType[] | null, achievementsRefetch: () => void, team: MyAchievementTeamType | null }) {
+export default function AchievementProgress({ achievements, refetch, team }: { achievements: AchievementExtendedType[] | null, refetch: () => void, team: MyAchievementTeamType | null }) {
     const session = useContext(SessionContext);
     const [state, setState] = useState<WebsocketState | null>(null);
     const { data } = useQuery({
@@ -109,8 +110,8 @@ export default function AchievementProgress({ achievements, achievementsRefetch,
             return;
         }
 
-        connect(session.wsUri, dispatchEventMsg, data, setState, achievementsRefetch);
-    }, [session.wsUri, dispatchEventMsg, data, state, achievementsRefetch]);
+        connect(session.wsUri, dispatchEventMsg, data, setState, refetch);
+    }, [session.wsUri, dispatchEventMsg, data, state, refetch]);
 
     if (team === null || achievements === null) {
         return <div>Loading team progress...</div>;
@@ -129,7 +130,7 @@ export default function AchievementProgress({ achievements, achievementsRefetch,
                 <h1>Achievement progress</h1>
                 <h1>{`${achievementCount}/${(achievements as AchievementExtendedType[]).length}`}</h1>
                 <div className="progress-bar">
-                    <div className="progress-bar-inner"></div>
+                    <div className="progress-bar-inner" style={{width: `${achievementCount / achievements.length * 100}%`}}></div>
                 </div>
             </div>
             <div className={submitCls} onClick={() => sendSubmit(state)}>Submit</div>

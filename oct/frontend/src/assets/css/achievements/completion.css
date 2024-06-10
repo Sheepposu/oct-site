@@ -120,12 +120,14 @@ p {
 }
 
 .progress-bar-inner {
-    width: 50%;
+    width: 0;
     height: 100%;
 
     border-radius: inherit;
 
     background-color: var(--bg-color1);
+
+    transition: width 1s;
 }
 
 .submit-button {
