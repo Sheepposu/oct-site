@@ -1,3 +1,4 @@
+import json
 from django.db import connection
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
@@ -52,11 +53,14 @@ def team(req):
         "players.user",
         "players.completions"
     ), players__user_id=req.user.id)
-    if team is not None:
-        team = _serialize_team(team[0], include=[
-            "players.completions",
-            "players.completions.achievement_id"
-        ])
+
+    if team == []:
+        return JsonResponse({"data": None}, safe=False)
+    
+    team = _serialize_team(team[0], include=[
+        "players.completions",
+        "players.completions.achievement_id"
+    ])
     return JsonResponse({"data": team}, safe=False)
 
 def teams(req):
@@ -67,7 +71,7 @@ def teams(req):
     
 @require_POST
 def join_team(req):
-    invite = req.POST.get("invite")
+    invite = json.loads(req.body)['invite']
     print(invite)
     team = None
     if invite is not None:
@@ -104,7 +108,7 @@ def leave_team(req):
 
 @require_POST
 def create_team(req):
-    name = req.POST.get("name")
+    name = json.loads(req.body)['name']
     if name is None or len(name) == 0 or len(name) > 31:
         return JsonResponse({"error": "invalid name"}, status=400, safe=False)
     
