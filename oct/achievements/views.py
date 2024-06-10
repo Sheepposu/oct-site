@@ -71,11 +71,11 @@ def teams(req):
     
 @require_POST
 def join_team(req):
-    invite = json.loads(req.body)['invite']
+    invite = json.loads(req.body)['code']
     print(invite)
     team = None
     if invite is not None:
-        team = Team.select_with(("players.user"), invite=invite)[0]
+        team = Team.select_with(("players.user",), invite=invite)[0]
     if team is None:
         return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
     
@@ -83,7 +83,7 @@ def join_team(req):
     if player is not None:
         return JsonResponse({"error": "already on a team"}, status=400, safe=False)
     
-    player = Player(user=req.user, team_id=team["id"])
+    player = Player(user=req.user, team_id=team.id)
     player.save()
     team.players.append(player)
     return JsonResponse({"data": _serialize_team(team)}, safe=False)
