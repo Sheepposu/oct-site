@@ -99,10 +99,12 @@ def leave_team(req):
         return JsonResponse({"error": "not on a team"}, status=400, safe=False)
     
     player = next(filter(lambda player: player.user.id == req.user.id, team.players))
-    player.delete()
-    if len(team.players) == 1:
-        team.delete()
+    
 
+    _team = Team.select_with(("players.user",), id=team.id)[0]
+    if len(_team.players) == 1:
+        team.delete()
+    player.delete()
     return JsonResponse({"data": None}, safe=False)
 
 
