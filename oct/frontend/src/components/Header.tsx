@@ -10,21 +10,30 @@ import osuLogo from "src/assets/images/osu.png";
 import "src/assets/css/main.css";
 import { SessionContext } from "src/contexts/SessionContext";
 import ErrorContainer from "./EventContainer";
-import { EventContext, EventState, EventStateType } from "src/contexts/EventContext";
+import {
+  EventContext,
+  EventState,
+  EventStateType,
+} from "src/contexts/EventContext";
 
-function errorReducer(events: EventState[], {type, msg}: {type: EventStateType, msg: string}) {
+function errorReducer(
+  events: EventState[],
+  { type, msg }: { type: EventStateType; msg: string }
+) {
   if (msg === "") {
     // TODO: add to some log where it can be accessed by the user to view past events
     return events.slice(1);
   }
 
   const now = Date.now();
-  return events.concat([{
-    type,
-    msg,
-    createdAt: now,
-    expiresAt: now + 10000,
-  }]);
+  return events.concat([
+    {
+      type,
+      msg,
+      createdAt: now,
+      expiresAt: now + 10000,
+    },
+  ]);
 }
 
 export default function Header() {
@@ -32,7 +41,7 @@ export default function Header() {
   const [useUpArrow, setUseUpArrow] = useState(false);
   const [errors, dispatchEventMsg] = useReducer(errorReducer, []);
 
-  const arrow = (useUpArrow ? UpArrow : DownArrow)("mobile-header-arrow")
+  const arrow = (useUpArrow ? UpArrow : DownArrow)("mobile-header-arrow");
   const backdrop = Backdrop(useUpArrow, setUseUpArrow);
 
   function onClick() {
@@ -67,7 +76,7 @@ export default function Header() {
             <p className="header-text">Bracket</p>
           </div>
         </Link>
-        <div style={{flexGrow: 1}}></div>
+        <div style={{ flexGrow: 1 }}></div>
         <div>
           {session.isAuthenticated ? (
             <Link to="/dashboard">
@@ -91,28 +100,40 @@ export default function Header() {
         </div>
       </div>
 
-      { /* Mobile header */ }
+      {/* Mobile header */}
       <div className="mobile-header-container">
         <div className="mobile-header header" onClick={onClick}>
-            <Link className="header-link" to="/">
-              <div className="header-link-container">
-                <h1 className="header-title">OCT</h1>
-              </div>
-            </Link>
-            { arrow }
+          <Link className="header-link" to="/">
+            <div className="header-link-container">
+              <h1 className="header-title">OCT</h1>
+            </div>
+          </Link>
+          {arrow}
         </div>
-        <div className="mobile-header-dropdown header-dropdown" style={{display: useUpArrow ? "flex" : "none"}}>
+        <div
+          className="mobile-header-dropdown header-dropdown"
+          style={{ display: useUpArrow ? "flex" : "none" }}
+        >
           <div className="dropdown-user-container">
-            <Link to="/dashboard">
-              <div className="login-box user-box">
-                {
-                  session.user === null ?
-                  <img src="assets/images/osu.png" alt="osu logo" className="login-pic"></img> :
-                  <img src={session.user.osu_avatar} alt="avatar" className="login-pic"></img>
-                }
-                <p className="login-text">{session.user === null ? "Login" : session.user.osu_username}</p>
-              </div>
-            </Link>
+            {session.isAuthenticated ? (
+              <Link to="/dashboard">
+                <div className="login-box user-box">
+                  <img
+                    src={session.user?.osu_avatar}
+                    alt="avatar"
+                    className="login-pic"
+                  />
+                  <p className="login-text">{session.user?.osu_username}</p>
+                </div>
+              </Link>
+            ) : (
+              <Link to={session.authUrl}>
+                <div className="login-box shadow">
+                  <img src={osuLogo} alt="osu logo" className="login-pic" />
+                  <p className="login-text">Log In</p>
+                </div>
+              </Link>
+            )}
           </div>
           <Link to="/achievements">
             <div className="header-dropdown-item" onClick={onClick}>
@@ -137,13 +158,12 @@ export default function Header() {
         </div>
       </div>
 
-      { backdrop }
-      
+      {backdrop}
+
       <EventContext.Provider value={dispatchEventMsg}>
         <ErrorContainer events={errors} />
         <Outlet />
       </EventContext.Provider>
-      
     </>
   );
 }
