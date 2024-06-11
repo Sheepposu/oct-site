@@ -89,9 +89,10 @@ def join_team(req):
     print(invite)
     team = None
     if invite is not None:
-        team = Team.select_with(("players.user",), invite=invite)[0]
-    if team is None:
-        return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
+        try:
+            team = Team.select_with(("players.user",), invite=invite)[0]
+        except IndexError:
+            return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
     
     player = Player.objects.filter(user_id=req.user.id).first()
     if player is not None:

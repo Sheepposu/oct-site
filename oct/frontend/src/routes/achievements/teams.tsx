@@ -76,8 +76,9 @@ export default function TeamsCard() {
     if (data.error) {
       dispatchEventMsg({
         type: "error",
-        msg: `An error occured: ${data.error}`,
+        msg: `An error occured while joining: ${data.error}`,
       });
+      return;
     }
 
     dispatchEventMsg({
@@ -115,8 +116,9 @@ export default function TeamsCard() {
     if (response.status !== 200) {
       dispatchEventMsg({
         type: "error",
-        msg: "Team creation failed, ping sheppsu or aychar",
+        msg: "Team creation failed, most likely chose an already existing team name.",
       });
+      teamsResponse.refetch();
       return;
     }
 
