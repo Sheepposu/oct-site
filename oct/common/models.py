@@ -89,7 +89,6 @@ def _parse_rows(rows, columns, many):
                 )
                 
                 count_values = lambda columns: sum([1 if isinstance(column[1], str) else count_values(column[1]) for column in columns[1]])
-                print(child_columns)
                 value_i += count_values(child_columns)
             else:
                 value = rows[row_i][value_i]
@@ -122,22 +121,27 @@ def _get_field(m, attr):
 
 def _deconstruct(model, kw):
     last_model = model
-    field = _get_field(model,  kw.split("__", 1)[0])
+    field_name = kw.split("__", 1)[0]
+    field = _get_field(model,  field_name)
+    table = field_name if isinstance(field, ForeignKey) else ""
     for attr in kw.split("__")[1:]:
-        last_model = field.target_field.model if isinstance(field, ForeignKey) and last_model._meta.db_table != field.target_field.model._meta.db_table else field.model
+        is_fk = isinstance(field, ForeignKey)
+        last_model = field.target_field.model if is_fk and last_model._meta.db_table != field.target_field.model._meta.db_table else field.model
         field = _get_field(
             last_model,
             attr
         )
-    return field.target_field if isinstance(field, ForeignKey) else field
+        if isinstance(field, ForeignKey):
+            table = table if table == "" else table + "_" + field.name
+    return (field.target_field if isinstance(field, ForeignKey) else field), table
 
 
 def _get_where(model, **kwargs):
     if len(kwargs) == 0:
         return "", None
     return "WHERE " + ",".join((
-        f"{field.model._meta.db_table}."+field.column + " = %s"
-        for field in map(lambda kw: _deconstruct(model, kw), kwargs.keys())
+        f"{table or field.model._meta.db_table}."+field.column + " = %s"
+        for field, table in map(lambda kw: _deconstruct(model, kw), kwargs.keys())
     )), tuple(kwargs.values())
 
 
@@ -169,11 +173,6 @@ class RelationCachingModel(Model):
         ))
         columns_str = stringify(columns)
         where_str, vars = _get_where(cls, **kwargs)
-        print(
-            f"SELECT {columns_str} FROM {cls._meta.db_table} {joins} {where_str}"
-            f"{'' if limit is None else ' LIMIT %d' % limit}"
-            f"{'' if offset is None else ' OFFSET %d' % offset}"
-        )
         with connection.cursor() as cursor:
             cursor.execute(
                 f"SELECT {columns_str} FROM {cls._meta.db_table} {joins} {where_str}"
