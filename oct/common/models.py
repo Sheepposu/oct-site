@@ -19,7 +19,7 @@ def _group_related_fields(related_fields: Iterable):
     return groupings
 
 
-def _get_columns(model, related_fields: Iterable):
+def _get_columns(model, related_fields: Iterable, table_as=None):
     columns = (model, [])
     joins = []
     includes = _group_related_fields(related_fields)
@@ -31,16 +31,17 @@ def _get_columns(model, related_fields: Iterable):
             is_one_to_one = isinstance(field, ForeignKey)
             target_column, column = (field.target_field.column, field.column) if is_one_to_one else \
                 (field.field.column, field.target_field.column)
+            child_table_as = field.name if table_as is None else table_as+"_"+field.name
             joins.append(
-                (field.related_model._meta.db_table, target_column, model._meta.db_table, column, is_one_to_one)
+                (field.related_model._meta.db_table, target_column, table_as or model._meta.db_table, column, is_one_to_one, child_table_as)
             )
 
-            new_columns, new_joins = _get_columns(field.related_model, include)
+            new_columns, new_joins = _get_columns(field.related_model, include, child_table_as)
             columns[1].append((field, new_columns))
             joins += new_joins
         except KeyError:
             if hasattr(field, "column"):
-                columns[1].append((field, f"{model._meta.db_table}.{field.column}"))
+                columns[1].append((field, f"{table_as or model._meta.db_table}.{field.column}"))
 
     if len(includes) != 0:
         raise ValueError(f"Invalid field {next(iter(includes.keys()))}")
@@ -86,7 +87,10 @@ def _parse_rows(rows, columns, many):
                     child_columns,
                     is_reverse
                 )
-                value_i += len([column for column in child_columns[1] if isinstance(column[1], str)])
+                
+                count_values = lambda columns: sum([1 if isinstance(column[1], str) else count_values(column[1]) for column in columns[1]])
+                print(child_columns)
+                value_i += count_values(child_columns)
             else:
                 value = rows[row_i][value_i]
                 try:
@@ -152,7 +156,7 @@ class RelationCachingModel(Model):
 
     # TODO: use querysets maybe
     @classmethod
-    def select_with(cls, related_fields: Iterable, **kwargs):
+    def select_with(cls, related_fields: Iterable, limit=None, offset=None, **kwargs):
         def stringify(columns):
             return ','.join(map(lambda item: item[1] if isinstance(item[1], str) else stringify(item[1]), columns[1]))
 
@@ -160,13 +164,23 @@ class RelationCachingModel(Model):
 
         joins = ' '.join(map(
             lambda
-                join: f"{'INNER' if join[4] else 'LEFT'} JOIN {join[0]} ON ({join[0]}.{join[1]} = {join[2]}.{join[3]})",
+                join: f"{'INNER' if join[4] else 'LEFT'} JOIN {join[0]}{'' if join[5] == join[0] else ' AS '+join[5]} ON ({join[5]}.{join[1]} = {join[2]}.{join[3]})",
             joins
         ))
         columns_str = stringify(columns)
         where_str, vars = _get_where(cls, **kwargs)
+        print(
+            f"SELECT {columns_str} FROM {cls._meta.db_table} {joins} {where_str}"
+            f"{'' if limit is None else ' LIMIT %d' % limit}"
+            f"{'' if offset is None else ' OFFSET %d' % offset}"
+        )
         with connection.cursor() as cursor:
-            cursor.execute(f"SELECT {columns_str} FROM {cls._meta.db_table} {joins} {where_str}", vars)
+            cursor.execute(
+                f"SELECT {columns_str} FROM {cls._meta.db_table} {joins} {where_str}"
+                f"{'' if limit is None else ' LIMIT %d' % limit}"
+                f"{'' if offset is None else ' OFFSET %d' % offset}",
+                vars
+            )
             return _parse_rows(cursor.fetchall(), columns, True)
 
     class Meta:
