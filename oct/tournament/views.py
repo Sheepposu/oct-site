@@ -97,7 +97,7 @@ def session_view(request):
         return JsonResponse({'isAuthenticated': False})
     
     user_serializer = UserSerializer(request.user)
-    serialized_user = user_serializer.serialize()
+    serialized_user = user_serializer.serialize(include=["involvements", "roles"])
 
     return JsonResponse({'isAuthenticated': True, 'user': serialized_user}, safe=False)
 
@@ -244,14 +244,8 @@ def logout(req):
 
 
 def dashboard(req):
-    t1 = time.time()
     if not req.user.is_authenticated:
         return HttpResponse(status=401)
-
-    player = StaticPlayer.objects.select_related("team").filter(
-        user=req.user,
-        team__bracket__tournament_iteration=OCT5
-    ).first()
 
     with connection.cursor() as cursor:
         cursor.execute(
@@ -371,7 +365,7 @@ def dashboard(req):
                     }]
                 }]
             }
-            for row in map(lambda r: parse_sql_row(r[0]), cursor.fetchall())
+            for row in cursor.fetchall()
         ]
 
     def combine(wholes, partial, hierarchy):
@@ -388,6 +382,10 @@ def dashboard(req):
         combine(matches, partial, ["teams", "players"])
 
     return JsonResponse(matches, safe=False)
+
+    # matches = TournamentMatch.select_with(("referee", "streamer", "commentator1", "commentator2", "tournament_round", "teams", "teams.players", "teams.players.user"))
+    # serializer = TournamentMatchSerializer(matches, many=True)
+    # return JsonResponse(serializer.serialize(), safe=False)
 
 
 def tournaments(req, name=None, section=None):
