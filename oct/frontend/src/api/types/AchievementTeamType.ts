@@ -10,6 +10,7 @@ export type AchievementTeamType = {
   invite: string;
   points: number;
   placement: number;
+  own_team: boolean;
   players: AchievementPlayerType[];
 };
 

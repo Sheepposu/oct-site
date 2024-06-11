@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import AnimatedPage from "src/AnimatedPage";
-import { useGetTeam, useGetTeams } from "src/api/query";
+import { useGetTeams } from "src/api/query";
 import { AchievementTeamType } from "src/api/types/AchievementTeamType";
 import "src/assets/css/achievements/teams.css";
 import "src/assets/css/tournaments/tournament/index.css";
@@ -24,15 +24,13 @@ export default function TeamsCard() {
   const teamsResponse = useGetTeams();
   const teams = teamsResponse.data;
 
-  const ownTeamResponse = useGetTeam();
-  const ownTeam = ownTeamResponse.data as AchievementTeamType;
+  let ownTeam = null;
 
   async function leaveTeam() {
     const response = await fetch("/api/achievements/team/leave/", {
       method: "POST",
     });
     if (response.status === 200) {
-      ownTeamResponse.refetch();
       teamsResponse.refetch();
       dispatchEventMsg({
         type: "info",
@@ -87,7 +85,6 @@ export default function TeamsCard() {
       msg: `Successfully joined team ${data.data?.name}`,
     });
 
-    ownTeamResponse.refetch();
     teamsResponse.refetch();
   }
 
@@ -128,9 +125,15 @@ export default function TeamsCard() {
       msg: `Team ${teamName} successfully created!`,
     });
 
-    ownTeamResponse.refetch();
     teamsResponse.refetch();
   }
+
+  if (Array.isArray(teams))
+    for (const team of teams) {
+      if (team.own_team == true) {
+        ownTeam = team;
+      }
+    }
 
   return (
     <div className="info-container">
@@ -141,7 +144,7 @@ export default function TeamsCard() {
           <div className="teams-card-container">
             <p style={{ paddingLeft: "20px" }}>Not authenticated.</p>
           </div>
-        ) : ownTeamResponse.isLoading ? (
+        ) : teamsResponse.isLoading ? (
           <div className="teams-card-container" style={{ height: "130px" }}>
             <p style={{ paddingLeft: "20px" }}>Loading...</p>
           </div>
@@ -154,7 +157,7 @@ export default function TeamsCard() {
             <TeamCard team={ownTeam} />
           </AnimatedPage>
         )}
-        {ownTeamResponse.isLoading == true ? (
+        {teamsResponse.isLoading == true ? (
           <></>
         ) : (
           <div className="info-buttons-container">
