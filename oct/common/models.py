@@ -120,18 +120,21 @@ def _get_field(m, attr):
     
 
 def _deconstruct(model, kw):
-    last_model = model
     field_name = kw.split("__", 1)[0]
+    
+    last_model = model
     field = _get_field(model,  field_name)
     table = field_name if isinstance(field, ForeignKey) else ""
+    is_fk = isinstance(field, ForeignKey)
     for attr in kw.split("__")[1:]:
-        is_fk = isinstance(field, ForeignKey)
         last_model = field.target_field.model if is_fk and last_model._meta.db_table != field.target_field.model._meta.db_table else field.model
         field = _get_field(
             last_model,
             attr
         )
-        if isinstance(field, ForeignKey):
+
+        is_fk = isinstance(field, ForeignKey)
+        if is_fk:
             table = table if table == "" else table + "_" + field.name
     return (field.target_field if isinstance(field, ForeignKey) else field), table
 
