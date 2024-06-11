@@ -16,11 +16,11 @@ export default function EventEntry({
   const dispatchEventMsg = useContext(EventContext);
   useEffect(() => {
     const timeoutId = setTimeout(
-      () => dispatchEventMsg({ type: "error", msg: "" }),
+      () => dispatchEventMsg({ type: "expired", id: event.id }),
       expiresIn
     );
     return () => clearTimeout(timeoutId);
-  }, [expiresIn, dispatchEventMsg]);
+  }, [expiresIn, dispatchEventMsg, event]);
 
   return (
     <AnimatedPage>

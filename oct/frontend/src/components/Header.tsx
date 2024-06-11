@@ -18,18 +18,27 @@ import {
 
 function errorReducer(
   events: EventState[],
-  { type, msg }: { type: EventStateType; msg: string }
+  { type, msg, id }: { type: EventStateType; msg?: string, id?: number }
 ) {
-  if (msg === "") {
-    // TODO: add to some log where it can be accessed by the user to view past events
-    return events.slice(1);
+  if (type === "expired") {
+    for (const [i, event] of events.entries()) {
+      if (event.id === id) {
+        // TODO: add to some log where it can be accessed by the user to view past events
+        return events.slice(0, i).concat(events.slice(i+1))
+      }
+    }
+    return events;
   }
 
   const now = Date.now();
+  if (id === undefined) {
+    id = events.length === 0 ? 1 : events[events.length - 1].id + 1;
+  }
   return events.concat([
     {
+      id,
       type,
-      msg,
+      msg: msg ?? "",
       createdAt: now,
       expiresAt: now + 10000,
     },
