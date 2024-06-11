@@ -83,6 +83,7 @@ def teams(req):
                 team['own_team'] = True
                 break
             team['players'] = []
+            team['invite'] = None
 
     return JsonResponse({"data": sorted_teams}, safe=False)
     
