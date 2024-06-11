@@ -24,9 +24,15 @@ export default function EventEntry({
 
   return (
     <AnimatedPage>
-      <div className={"event-entry " + event.type}>
+      <div
+        className={"prevent-select event-entry " + event.type}
+        onClick={() => (event.expiresAt = time)}
+      >
         <p className="event-text">{event.msg}</p>
-        <div className="event-bar" style={{ width: progress }}></div>
+        <div
+          className={"event-bar " + event.type}
+          style={{ width: progress }}
+        ></div>
       </div>
     </AnimatedPage>
   );

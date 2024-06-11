@@ -357,11 +357,11 @@ hr {
 
   right: 0;
   bottom: 0;
-  
+
   display: flex;
   flex-direction: column;
   justify-content: end;
-  gap: 5px;
+  gap: 10px;
 }
 
 .event-entry {
@@ -370,15 +370,17 @@ hr {
 
   border-radius: 10px;
 
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgb(255, 255, 255);
 }
 
 .event-entry.error {
-  border: 2px solid rgb(224, 78, 78);
+  border: 2px solid rgb(212, 112, 112);
+  box-shadow: 0px 0px 30px 0px rgba(235, 77, 77, 0.61);
 }
 
 .event-entry.info {
-  border: 2px solid rgb(87, 131, 244);
+  border: 2px solid rgb(126, 161, 248);
+  box-shadow: 0px 0px 30px 0px rgba(56, 163, 235, 0.61);
 }
 
 .event-text {
@@ -387,8 +389,15 @@ hr {
 
 .event-bar {
   height: 5px;
-
   background-color: rgb(62, 148, 235);
-
   transition: width 0.1s linear;
+  border-radius: 30px;
+}
+
+.event-bar.info {
+  background-color: rgb(62, 148, 235);
+}
+
+.event-bar.error {
+  background-color: rgb(227, 62, 62);
 }
