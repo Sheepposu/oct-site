@@ -23,8 +23,7 @@ class MappoolBeatmapSerializer:
 @serializer
 class UserSerializer:
     model = User
-    # involvements should be selected by default
-    fields = ['osu_id', 'osu_username', 'osu_avatar', 'osu_cover', 'is_admin', 'involvements', 'roles']
+    fields = ['osu_id', 'osu_username', 'osu_avatar', 'osu_cover', 'is_admin']
 
 
 @serializer
