@@ -6,7 +6,7 @@ body {
 
 .index-container {
   display: flex;
-  height: calc(100vh - 160px);
+  height: calc(100vh - 230px);
   width: 100vw;
   flex-direction: row;
 }
