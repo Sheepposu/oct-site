@@ -353,7 +353,7 @@ hr {
   max-width: 300px;
   padding: 10px;
 
-  position: absolute;
+  position: fixed;
 
   right: 0;
   bottom: 0;
@@ -362,6 +362,7 @@ hr {
   flex-direction: column;
   justify-content: end;
   gap: 10px;
+  z-index: 15;
 }
 
 .event-entry {
