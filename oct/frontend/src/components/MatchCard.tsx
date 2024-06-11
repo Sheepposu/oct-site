@@ -7,14 +7,11 @@ import Box from "@mui/material/Box";
 import MatchPage from "./MatchPage";
 import { BsArrowUpRight, BsX } from "react-icons/bs";
 
-const matchColors = {};
-
 export default function MatchCard(props: { match: MatchType }) {
   const match = props.match;
   let time = null;
   let hasStarted = false;
   let progress = null;
-  let color = null;
 
   if (match.starting_time == null) {
     time = null;

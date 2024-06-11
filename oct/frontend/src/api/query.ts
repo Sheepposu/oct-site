@@ -1,4 +1,4 @@
-import { UndefinedInitialDataOptions, UseQueryResult, useQuery } from "@tanstack/react-query";
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { AchievementExtendedType } from "./types/AchievementType";
 import { AchievementTeamType, MyAchievementTeamType } from "./types/AchievementTeamType";
 import { useContext } from "react";
