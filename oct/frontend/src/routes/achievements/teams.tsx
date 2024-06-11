@@ -157,7 +157,7 @@ export default function TeamsCard() {
             <TeamCard team={ownTeam} hidePlayers={false} />
           </AnimatedPage>
         )}
-        {teamsResponse.isLoading == true ? (
+        {teamsResponse.isLoading == true || !session.isAuthenticated ? (
           <></>
         ) : (
           <div className="info-buttons-container">

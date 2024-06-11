@@ -70,14 +70,10 @@ def teams(req):
 
     sorted_teams = sorted(teams, key=lambda t: t['points'], reverse=True)
 
-    authenticated = False
-    if req.user.is_authenticated:
-        authenticated = True
-
     for placement, team in enumerate(sorted_teams, start=1):
         team['placement'] = placement
-
         team['own_team'] = False
+        
         for player in team['players']:
             if player['user']['osu_id'] == (req.user.osu_id if req.user.is_authenticated else 0):
                 team['own_team'] = True
