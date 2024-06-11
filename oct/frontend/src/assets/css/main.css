@@ -390,7 +390,6 @@ hr {
 .event-bar {
   height: 5px;
   background-color: rgb(62, 148, 235);
-  transition: width 0.1s linear;
   border-radius: 30px;
 }
 

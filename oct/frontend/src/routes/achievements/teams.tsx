@@ -186,6 +186,10 @@ export default function TeamsCard() {
                   color="#06c926"
                   onClick={() => {
                     navigator.clipboard.writeText(ownTeam.invite);
+                    dispatchEventMsg({
+                      type: "info",
+                      msg: "Copied team code to clipboard!",
+                    });
                   }}
                 >
                   Copy Team Code
