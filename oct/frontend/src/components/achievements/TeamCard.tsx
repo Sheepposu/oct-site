@@ -1,7 +1,13 @@
 import { AchievementTeamType } from "src/api/types/AchievementTeamType";
 import "src/assets/css/achievements/teams.css";
 
-export default function TeamCard({ team }: { team: AchievementTeamType }) {
+export default function TeamCard({
+  team,
+  hidePlayers,
+}: {
+  team: AchievementTeamType;
+  hidePlayers: boolean;
+}) {
   let placementColor: string;
   switch (team.placement) {
     case 1:
@@ -37,15 +43,22 @@ export default function TeamCard({ team }: { team: AchievementTeamType }) {
         </div>
       </div>
       <div className="teams-card-players-container">
-        {team.players.map((player) => (
-          <div className="teams-card-player">
-            <img
-              src={player.user.osu_avatar}
-              className="teams-card-player-image"
-            />
-            <p className="teams-card-player-text">{player.user.osu_username}</p>
-          </div>
-        ))}
+        {hidePlayers ? (
+          <></>
+        ) : (
+          team.players.map((player) => (
+            <div className="teams-card-player">
+              <img
+                src={player.user.osu_avatar}
+                className="teams-card-player-image"
+              />
+              <p className="teams-card-player-text">
+                {player.user.osu_username}
+              </p>
+            </div>
+          ))
+        )}
+        {}
       </div>
     </>
   );

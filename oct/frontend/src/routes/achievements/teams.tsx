@@ -154,7 +154,7 @@ export default function TeamsCard() {
           </div>
         ) : (
           <AnimatedPage>
-            <TeamCard team={ownTeam} />
+            <TeamCard team={ownTeam} hidePlayers={false} />
           </AnimatedPage>
         )}
         {teamsResponse.isLoading == true ? (
@@ -208,7 +208,7 @@ export default function TeamsCard() {
       <div className="info-teams-container">
         {teams?.map((team, index) => (
           <AnimatedPage>
-            <TeamCard key={index} team={team} />
+            <TeamCard key={index} team={team} hidePlayers={true} />
           </AnimatedPage>
         ))}
       </div>

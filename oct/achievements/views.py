@@ -78,11 +78,12 @@ def teams(req):
         team['placement'] = placement
 
         team['own_team'] = False
-        if authenticated == True:
-            for player in team['players']:
-                if player['user']['osu_id'] == req.user.osu_id:
-                    team['own_team'] = True
-                    break
+        for player in team['players']:
+            if player['user']['osu_id'] == (req.user.osu_id if req.user.is_authenticated else 0):
+                team['own_team'] = True
+                break
+            team['players'] = []
+
     return JsonResponse({"data": sorted_teams}, safe=False)
     
 @require_POST
