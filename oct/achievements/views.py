@@ -17,7 +17,7 @@ from .serializers import *
 def _serialize_team(team, many=False, include=None):
     if include is None:
         include = []
-    return TeamSerializer(team, many).serialize(include=["players.user"]+include, exclude=["players.user.roles", "players.user.involvements"])
+    return TeamSerializer(team, many).serialize(include=["players.user"]+include)
 
 
 def achievements(req):
@@ -73,7 +73,7 @@ def teams(req):
     for placement, team in enumerate(sorted_teams, start=1):
         team['placement'] = placement
         team['own_team'] = False
-        
+
         for player in team['players']:
             if player['user']['osu_id'] == (req.user.osu_id if req.user.is_authenticated else 0):
                 team['own_team'] = True
