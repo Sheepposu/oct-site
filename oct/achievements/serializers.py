@@ -17,7 +17,7 @@ class AchievementCompletionSerializer:
 @serializer
 class TeamSerializer:
     model = Team
-    fields = ["id", "name", "icon", "invite"]
+    fields = ["id", "name", "icon", "invite", "points"]
 
 
 @serializer

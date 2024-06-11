@@ -67,7 +67,23 @@ def teams(req):
     teams = Team.select_with(("players.user",))
     if teams is not None:
         teams = _serialize_team(teams, many=True)
-    return JsonResponse({"data": teams}, safe=False)
+
+    sorted_teams = sorted(teams, key=lambda t: t['points'], reverse=True)
+
+    authenticated = False
+    if req.user.is_authenticated:
+        authenticated = True
+
+    for placement, team in enumerate(sorted_teams, start=1):
+        team['placement'] = placement
+
+        if authenticated == True:
+            team['own_team'] = False
+            for player in team['players']:
+                if player['user']['osu_id'] == req.user.osu_id:
+                    team['own_team'] = True
+                    break
+    return JsonResponse({"data": sorted_teams}, safe=False)
     
 @require_POST
 def join_team(req):
