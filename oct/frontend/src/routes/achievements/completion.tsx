@@ -19,7 +19,7 @@ function HiddenAchievementCompletionPage({
     const delta = EVENT_START - time;
 
     const days = Math.floor(delta / (1000 * 60 * 60 * 24) % 60);
-    const hours = Math.floor(delta / (1000 * 60 * 60) % 60);
+    const hours = Math.floor(delta / (1000 * 60 * 60) % 24);
     const minutes = Math.floor(delta / (1000 * 60) % 60);
     const seconds = Math.floor(delta / 1000 % 60);
     const timeString = [days, hours, minutes, seconds].map((n) => n < 10 ? "0" + n : "" + n).join(":");
