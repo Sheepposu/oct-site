@@ -11,3 +11,12 @@
 .button:hover {
   cursor: pointer;
 }
+
+.button.unavailable {
+  filter: brightness(50%);
+  transition: linear 0.2s;
+}
+
+.button.unavailable:hover {
+  cursor: not-allowed;
+}

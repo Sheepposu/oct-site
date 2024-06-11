@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import AnimatedPage from "src/AnimatedPage";
 import { useGetTeams } from "src/api/query";
 import { AchievementTeamType } from "src/api/types/AchievementTeamType";
@@ -27,7 +27,10 @@ export default function TeamsCard() {
   let ownTeam = null;
   let ownPlacement = null;
 
+  const [isPending, setIsPending] = useState<boolean>(false);
+
   async function leaveTeam() {
+    setIsPending(true);
     const response = await fetch("/api/achievements/team/leave/", {
       method: "POST",
     });
@@ -43,6 +46,7 @@ export default function TeamsCard() {
         msg: `Failed to leave team:`,
       });
     }
+    setIsPending(false);
   }
 
   type joinTeamResponseType = {
@@ -52,6 +56,7 @@ export default function TeamsCard() {
 
   async function joinTeam(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setIsPending(true);
 
     const formData = new FormData(event.currentTarget);
     const code = formData.get("code") as string;
@@ -69,6 +74,7 @@ export default function TeamsCard() {
         type: "error",
         msg: `An error occured while joining the team: ${err}`,
       });
+      setIsPending(false);
       return;
     })) as Response;
 
@@ -79,6 +85,7 @@ export default function TeamsCard() {
         type: "error",
         msg: `An error occured while joining: ${data.error}`,
       });
+      setIsPending(false);
       return;
     }
 
@@ -88,10 +95,12 @@ export default function TeamsCard() {
     });
 
     teamsResponse.refetch();
+    setIsPending(false);
   }
 
   async function createTeam(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setIsPending(true);
 
     const formData = new FormData(event.currentTarget);
     const teamName = formData.get("name") as string;
@@ -101,6 +110,7 @@ export default function TeamsCard() {
         type: "error",
         msg: "Team name needs to be between 3 and 32 characters",
       });
+      setIsPending(false);
       return;
     }
 
@@ -120,6 +130,7 @@ export default function TeamsCard() {
         msg: "Team creation failed, most likely chose an already existing team name.",
       });
       teamsResponse.refetch();
+      setIsPending(false);
       return;
     }
 
@@ -127,8 +138,7 @@ export default function TeamsCard() {
       type: "info",
       msg: `Team ${teamName} successfully created!`,
     });
-
-    teamsResponse.refetch();
+    setIsPending(false);
   }
 
   if (Array.isArray(teams))
@@ -158,7 +168,11 @@ export default function TeamsCard() {
           </div>
         ) : (
           <AnimatedPage>
-            <TeamCard team={ownTeam} hidePlayers={false} placement={ownPlacement as number} />
+            <TeamCard
+              team={ownTeam}
+              hidePlayers={false}
+              placement={ownPlacement as number}
+            />
           </AnimatedPage>
         )}
         {teamsResponse.isLoading || !session.isAuthenticated ? (
@@ -167,12 +181,16 @@ export default function TeamsCard() {
           <div className="info-buttons-container">
             <div>
               {ownTeam !== null ? (
-                <Button color="#fc1e1e" onClick={leaveTeam}>
+                <Button
+                  color="#fc1e1e"
+                  onClick={leaveTeam}
+                  unavailable={isPending}
+                >
                   Leave Team
                 </Button>
               ) : (
                 <form onSubmit={createTeam}>
-                  <Button type="submit" color="#06c926">
+                  <Button type="submit" color="#06c926" unavailable={isPending}>
                     Create Team
                   </Button>
                   <input
@@ -188,6 +206,7 @@ export default function TeamsCard() {
               {ownTeam !== null ? (
                 <Button
                   color="#06c926"
+                  unavailable={isPending}
                   onClick={() => {
                     navigator.clipboard.writeText(ownTeam.invite);
                     dispatchEventMsg({
@@ -205,7 +224,9 @@ export default function TeamsCard() {
                     name="code"
                     style={{ marginRight: "8px" }}
                   />
-                  <Button type="submit">Join Team</Button>
+                  <Button type="submit" unavailable={isPending}>
+                    Join Team
+                  </Button>
                 </form>
               )}
             </div>
@@ -216,7 +237,12 @@ export default function TeamsCard() {
       <div className="info-teams-container">
         {teams?.map((team, index) => (
           <AnimatedPage>
-            <TeamCard key={index} team={team} hidePlayers={true} placement={index+1} />
+            <TeamCard
+              key={index}
+              team={team}
+              hidePlayers={true}
+              placement={index + 1}
+            />
           </AnimatedPage>
         ))}
       </div>
