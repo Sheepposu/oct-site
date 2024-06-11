@@ -54,12 +54,13 @@ if DEBUG:
     ALLOWED_HOSTS = ["*"]
 else:
     ALLOWED_HOSTS = [
-        "localhost",
-        "127.0.0.1",
-        "oct.sheppsu.me",
-        "parched-flowers-production.up.railway.app"
+        "ocah.sheppsu.me"
     ]
 
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Application definition
 
