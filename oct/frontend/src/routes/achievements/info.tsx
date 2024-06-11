@@ -4,7 +4,7 @@ export default function InfoCard() {
   return (
     <div className="info-container">
       <h1 className="info-title">Offline Chat Achievement Hunt</h1>
-      <p className="info-text">June 8th - June 16th (UTC Time)</p>
+      <p className="info-text">June 15th - June 23rd (UTC Time)</p>
       <p className="info-subtitle">About</p>
       <p className="info-text">
         Offline Chat Achievement Hunt is a team event with the objective of

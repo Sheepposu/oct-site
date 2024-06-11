@@ -8,10 +8,10 @@ export default function AchievementsIndex() {
   return (
     <AnimatedPage>
       <div className="index-container">
-        <div className="card-container">
+        <div className="card-container teams">
           <TeamsCard />
         </div>
-        <div className="card-container">
+        <div className="card-container info">
           <InfoCard />
         </div>
       </div>

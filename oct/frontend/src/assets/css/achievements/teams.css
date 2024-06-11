@@ -9,16 +9,27 @@
 /* teams card */
 
 .teams-card-container {
-  position: relative;
   width: 100%;
-  height: 75px;
-  background-color: rgb(255, 255, 255);
+
+  background-color: #cbcbcb;
   border-radius: var(--border-rounding);
   box-shadow: var(--box-shadow);
+
   display: flex;
-  margin: 12px 0px 15px 0px;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.teams-card-info-container {
+  width: 100%;
+  height: 50px;
+  
+  background-color: white;
+  border-radius: var(--border-rounding);
+
+  display: flex;
   align-items: center;
-  z-index: 10;
+  gap: 5px;
 }
 
 .teams-players-container {
@@ -27,54 +38,55 @@
 }
 
 .teams-placement {
-  background-color: red;
   height: 100%;
-  width: 80px;
-  border-radius: var(--border-rounding);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
+  padding: 4px 0;
+  width: 50px;
+  flex-shrink: 0;
+
+  background-color: #438efd;
   color: white;
+
+  border-radius: var(--border-rounding);
+
+  font-weight: 800;
   font-size: xx-large;
-  margin-right: 12px;
+  text-align: center;
+}
+
+.teams-placement.n1 {
+  background-color: #fff419;
+}
+
+.teams-placement.n2 {
+  background-color: #e3e3e3;
+}
+
+.team-placement.n3 {
+  background-color: #8a6500;
 }
 
 .teams-icon {
-  height: 60px;
-  width: 60px;
-  min-width: 60px;
+  height: 80%;
+  aspect-ratio: 1/1;
+
   background-color: rgb(208, 208, 208);
   border-radius: 100%;
-  margin-right: 6px;
 }
 
 .teams-team-name {
+  flex-grow: 1;
+
   font-weight: 600;
   font-size: larger;
-  width: 225px;
-}
-@media (max-width: 900px) {
-  .teams-placement {
-    min-width: 40px;
-    font-size: x-large;
-  }
 
-  .teams-icon {
-    margin-right: 4px;
-  }
-}
-
-@media (max-width: 500px) {
-  .teams-team-name {
-    width: 175px;
-    font-size: large;
-  }
+  text-wrap: nowrap;
+  overflow: hidden;
 }
 
 .teams-divider {
   height: 100%;
   width: 100%;
+
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -91,22 +103,17 @@
 }
 
 .teams-points {
+  height: 100%;
+  padding: 8px 0;
+  width: 80px;
+
   font-weight: bold;
   font-size: x-large;
   font-style: italic;
-}
+  text-align: center;
 
-.teams-card-players-container {
-  width: 100%;
-  z-index: 1;
-  background-color: #cbcbcb;
+  background-color: rgb(208, 208, 208);
   border-radius: var(--border-rounding);
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-top: -40px;
-  padding-top: 25px;
-  margin-bottom: 10px;
 }
 
 .teams-card-player {

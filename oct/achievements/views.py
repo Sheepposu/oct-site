@@ -65,21 +65,16 @@ def team(req):
 
 def teams(req):
     teams = Team.select_with(("players.user",))
-    if teams is not None:
-        teams = _serialize_team(teams, many=True)
 
-    sorted_teams = sorted(teams, key=lambda t: t['points'], reverse=True)
-
-    for placement, team in enumerate(sorted_teams, start=1):
-        team['placement'] = placement
-        team['own_team'] = False
-
-        for player in team['players']:
-            if player['user']['osu_id'] == (req.user.osu_id if req.user.is_authenticated else 0):
-                team['own_team'] = True
-                break
-            team['players'] = []
-            team['invite'] = None
+    serialized_teams = [
+        TeamSerializer(team).serialize(*(
+            (None, ["players.user"])
+            if any(map(lambda p: p.user.id == req.user.id, team.players))
+            else (["invite"], None)
+        ))
+        for team in teams
+    ]
+    sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
 
     return JsonResponse({"data": sorted_teams}, safe=False)
     

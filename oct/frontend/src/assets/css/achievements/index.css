@@ -5,25 +5,25 @@ body {
 /* Info page stuff */
 
 .index-container {
+  margin-top: 50px;
+
   display: flex;
-  height: calc(100vh - 230px);
-  width: 100vw;
   flex-direction: row;
+  justify-content: center;
+  gap: 20px;
 }
 
 .card-container {
-  height: 100%;
-  width: 50%;
+  width: 100%;
+  max-width: 600px;
 }
 
 .info-container {
-  width: 90%;
-  max-width: 800px;
-  border-radius: 20px;
-
-  margin: auto;
-  margin-top: 50px;
+  width: 100%;
   padding: 15px;
+  margin: 0;
+
+  border-radius: 20px;
   text-align: center;
 
   background-color: #ffffff;
@@ -73,18 +73,26 @@ body {
 
 .info-your-team-container {
   width: 100%;
+  padding: 12px;
+
   background-color: #f0f0f0;
   border-radius: 20px;
-  padding: 1px 12px 12px 12px;
-  margin: 0px 0px 10px 0px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .info-teams-container {
   width: 100%;
-  height: 500px;
+  padding: 12px;
+
   background-color: #f0f0f0;
   border-radius: 20px;
-  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 @media (max-width: 1200px) {
@@ -93,34 +101,16 @@ body {
     align-items: center;
   }
 
-  .card-container {
-    width: 80%;
-  }
-}
-
-@media (max-width: 900px) {
-  .card-container {
-    width: 100%;
+  .card-container.info {
+    order: 1;
   }
 
-  .info-container {
-    width: 100%;
-    border-radius: 0px;
-    max-width: 10000px;
-    margin-top: 0px;
-    height: 100%;
-  }
-
-  .info-teams-container {
-    height: 280px;
+  .card-container.teams {
+    order: 2;
   }
 }
 
 @media (max-width: 500px) {
-  .info-your-team-container {
-    height: 210px;
-  }
-
   .info-buttons-container {
     flex-direction: column;
     gap: 10px;

@@ -13,7 +13,7 @@ function AchievementEntry({team, placement}: {team: AchievementTeamType, placeme
                 <img className="placement-img" src={icon}></img>
                 <p className="placement-text">{team.name}</p>
             </div>
-            <h1 className="placement-text points">0</h1>
+            <h1 className="placement-text points">{team.points}</h1>
         </div>
     );
 }

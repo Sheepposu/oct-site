@@ -25,6 +25,7 @@ export default function TeamsCard() {
   const teams = teamsResponse.data;
 
   let ownTeam = null;
+  let ownPlacement = null;
 
   async function leaveTeam() {
     const response = await fetch("/api/achievements/team/leave/", {
@@ -131,9 +132,10 @@ export default function TeamsCard() {
   }
 
   if (Array.isArray(teams))
-    for (const team of teams) {
-      if (team.own_team == true) {
+    for (const [i, team] of teams.entries()) {
+      if (team.invite !== undefined) {
         ownTeam = team;
+        ownPlacement = i + 1;
       }
     }
 
@@ -156,10 +158,10 @@ export default function TeamsCard() {
           </div>
         ) : (
           <AnimatedPage>
-            <TeamCard team={ownTeam} hidePlayers={false} />
+            <TeamCard team={ownTeam} hidePlayers={false} placement={ownPlacement as number} />
           </AnimatedPage>
         )}
-        {teamsResponse.isLoading == true || !session.isAuthenticated ? (
+        {teamsResponse.isLoading || !session.isAuthenticated ? (
           <></>
         ) : (
           <div className="info-buttons-container">
@@ -214,7 +216,7 @@ export default function TeamsCard() {
       <div className="info-teams-container">
         {teams?.map((team, index) => (
           <AnimatedPage>
-            <TeamCard key={index} team={team} hidePlayers={true} />
+            <TeamCard key={index} team={team} hidePlayers={true} placement={index+1} />
           </AnimatedPage>
         ))}
       </div>
