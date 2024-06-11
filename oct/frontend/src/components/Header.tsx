@@ -61,7 +61,7 @@ export default function Header() {
             <p className="header-text">OCAH</p>
           </div>
         </Link>
-        <Link to="/tournaments" className="header-link">
+        {/*<Link to="/tournaments" className="header-link">
           <div className="header-link-container">
             <p className="header-text">Tournaments</p>
           </div>
@@ -75,11 +75,11 @@ export default function Header() {
           <div className="header-link-container">
             <p className="header-text">Bracket</p>
           </div>
-        </Link>
+        </Link>*/}
         <div style={{ flexGrow: 1 }}></div>
         <div>
           {session.isAuthenticated ? (
-            <Link to="/dashboard">
+            /*<Link to="/dashboard">*/
               <div className="login-box user-box">
                 <img
                   src={session.user?.osu_avatar}
@@ -88,7 +88,7 @@ export default function Header() {
                 />
                 <p className="login-text">{session.user?.osu_username}</p>
               </div>
-            </Link>
+            /*</Link>*/
           ) : (
             <Link to={session.authUrl}>
               <div className="login-box shadow">
@@ -116,7 +116,7 @@ export default function Header() {
         >
           <div className="dropdown-user-container">
             {session.isAuthenticated ? (
-              <Link to="/dashboard">
+              /*<Link to="/dashboard">*/
                 <div className="login-box user-box">
                   <img
                     src={session.user?.osu_avatar}
@@ -125,7 +125,7 @@ export default function Header() {
                   />
                   <p className="login-text">{session.user?.osu_username}</p>
                 </div>
-              </Link>
+              /*</Link>*/
             ) : (
               <Link to={session.authUrl}>
                 <div className="login-box shadow">
@@ -140,7 +140,7 @@ export default function Header() {
               <p className="header-text dropdown">OCAH</p>
             </div>
           </Link>
-          <Link to="/tournaments">
+          {/*<Link to="/tournaments">
             <div className="header-dropdown-item" onClick={onClick}>
               <p className="header-text dropdown">Tournaments</p>
             </div>
@@ -154,7 +154,7 @@ export default function Header() {
             <div className="header-dropdown-item" onClick={onClick}>
               <p className="header-text dropdown">Bracket</p>
             </div>
-          </Link>
+          </Link>*/}
         </div>
       </div>
 

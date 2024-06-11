@@ -17,7 +17,7 @@ def index_view(req):
     }
 
     if req.user.is_authenticated:
-        context["data"]["user"] = UserSerializer(req.user).serialize()
+        context["data"]["user"] = UserSerializer(req.user).serialize(include=["involvements", "roles"])
 
     return render(req, 'dist/index.html', context)
 
