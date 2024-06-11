@@ -77,8 +77,8 @@ def teams(req):
     for placement, team in enumerate(sorted_teams, start=1):
         team['placement'] = placement
 
+        team['own_team'] = False
         if authenticated == True:
-            team['own_team'] = False
             for player in team['players']:
                 if player['user']['osu_id'] == req.user.osu_id:
                     team['own_team'] = True
