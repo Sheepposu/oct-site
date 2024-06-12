@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import AnimatedPage from "src/AnimatedPage";
 import { SessionContext } from "src/contexts/SessionContext";
 import { getSessionData } from "src/util/auth";
@@ -6,6 +7,8 @@ export default function App() {
   function logoutRedirect() {
     window.location.replace("/logout");
   }
+
+  const session = useContext(SessionContext);
 
   return (
     <AnimatedPage>
@@ -37,7 +40,11 @@ export default function App() {
           >
             Click OCAH on the header to do stuff I guess...
           </p>
-          <div onClick={logoutRedirect}>Click to logout</div>
+          {session.isAuthenticated ? (
+            <div onClick={logoutRedirect}>Click to logout</div>
+          ) : (
+            <></>
+          )}
         </div>
       </SessionContext.Provider>
     </AnimatedPage>
