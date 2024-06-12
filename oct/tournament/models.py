@@ -131,7 +131,7 @@ class UserManager(BaseUserManager):
         if not select_extra:
             return super().get(*args, **kwargs)
         user = User.select_with(("involvements",), **kwargs)
-        if user is not None:
+        if len(user) > 0:
             return user[0]
         raise models.ObjectDoesNotExist()
 
