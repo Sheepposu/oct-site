@@ -159,7 +159,7 @@ def create_team(req):
     player.save()
     
     team = TeamSerializer(team).serialize()
-    player = PlayerSerializer(player).serialize(include=["user"], exclude=["user.involvements", "user.roles"])
+    player = PlayerSerializer(player).serialize(include=["user"])
     player["completions"] = 0
     team["players"] = [player]
     return JsonResponse({"data": team}, safe=False)

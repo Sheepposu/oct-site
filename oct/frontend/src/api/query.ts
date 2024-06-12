@@ -24,11 +24,12 @@ async function doFetch<T>(
   const resp = await fetch(getUrl(endpoint), init);
   
   if (resp.status !== 200) {
-    const error = (await resp.json());
     let errorMsg = null;
-    if (error !== null) {
+    try {
+      const error = (await resp.json());
       errorMsg = error.error;
-    }
+    // eslint-disable-next-line no-empty
+    } catch {}
 
     dispatchEventMsg({type: "error", msg: `Request error${errorMsg === null ? "" : ": "+errorMsg }`});
     console.error(`Error fetching ${endpoint}: `, errorMsg);
@@ -86,7 +87,10 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation({
     mutationKey: ["achievements", "team", "leave"],
-    onSuccess: () => queryClient?.setQueryData(["achievements", "team"], () => null)
+    onSuccess: () => {
+      queryClient?.setQueryData(["achievements", "team"], () => null);
+      queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => old.filter((team) => team.invite === undefined))
+    }
   }, {
     method: "DELETE"
   });
@@ -106,7 +110,10 @@ export function useCreateTeam(): SpecificUseMutationResult<MyAchievementTeamType
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation({
     mutationKey: ["achievements", "team", "new"],
-    onSuccess: (data) => queryClient?.setQueryData(["achievements", "team"], () => data)
+    onSuccess: (data) => {
+      queryClient?.setQueryData(["achievements", "team"], () => data);
+      queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => old.concat([data]));
+    }
   }, {
     method: "POST"
   });
