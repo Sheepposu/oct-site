@@ -108,6 +108,9 @@ def join_team(req):
     except IndexError:
         return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
     
+    if len(team.players) == 5:
+        return error("That team is already full")
+    
     player = Player.objects.filter(user_id=req.user.id).first()
     if player is not None:
         return JsonResponse({"error": "already on a team"}, status=400, safe=False)
