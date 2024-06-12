@@ -133,7 +133,7 @@ class UserManager(BaseUserManager):
         user = User.select_with(("involvements",), **kwargs)
         if len(user) > 0:
             return user[0]
-        raise models.ObjectDoesNotExist()
+        raise User.DoesNotExist()
 
     def filter(self, *args, select_extra=True, **kwargs):
         if not select_extra:
