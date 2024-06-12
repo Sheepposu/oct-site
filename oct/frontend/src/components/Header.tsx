@@ -15,6 +15,7 @@ import {
   EventState,
   EventStateType,
 } from "src/contexts/EventContext";
+import Footer from "./Footer";
 
 function errorReducer(
   events: EventState[],
@@ -173,6 +174,8 @@ export default function Header() {
         <ErrorContainer events={errors} />
         <Outlet />
       </EventContext.Provider>
+
+      <Footer />
     </>
   );
 }
