@@ -231,9 +231,6 @@ def login(req):
         return redirect(state or "index")
     except requests.HTTPError as exc:
         return HttpResponseBadRequest()
-    except Exception as exc:
-        log_err(req, exc)
-        return HttpResponseServerError()
 
 
 def logout(req):
