@@ -19,11 +19,9 @@ async function doFetch<T>(
     id?: number | undefined;
   }>,
   endpoint: string,
-  params: Record<string, string> | null = null,
   init?: RequestInit
 ): Promise<T> {
-  const paramString = params === null ? "" : ("?" + new URLSearchParams(params))
-  const resp = await fetch(getUrl(endpoint)+paramString, init);
+  const resp = await fetch(getUrl(endpoint), init);
   
   if (resp.status !== 200) {
     const error = (await resp.json());
@@ -32,7 +30,7 @@ async function doFetch<T>(
       errorMsg = error.error;
     }
 
-    dispatchEventMsg({type: "error", msg: `Error fetching ${endpoint}${errorMsg === null ? "" : ": "+errorMsg }`});
+    dispatchEventMsg({type: "error", msg: `Request error${errorMsg === null ? "" : ": "+errorMsg }`});
     console.error(`Error fetching ${endpoint}: `, errorMsg);
     throw Error(errorMsg);
   }
@@ -47,23 +45,23 @@ export function useMakeQuery<T>(
   const dispatchEventMsg = useContext(EventContext);
   const endpoint = query.queryKey.join("/");
 
-  query.queryFn = () => doFetch(dispatchEventMsg, endpoint, null, init);
+  query.queryFn = () => doFetch(dispatchEventMsg, endpoint, init);
 
   return useQuery(queryOptions(query));
 }
 
-type SpecificUseMutationResult<T> = UseMutationResult<T, Error, Record<string, string>>
+type SpecificUseMutationResult<T> = UseMutationResult<T, Error, object>
 
 export function useMakeMutation<T>(
-  mutation: UseMutationOptions<T, Error, Record<string, string>, unknown>,
+  mutation: UseMutationOptions<T, Error, object, unknown>,
   init?: RequestInit
 ): SpecificUseMutationResult<T> {
   const dispatchEventMsg = useContext(EventContext);
   const endpoint = (mutation.mutationKey as MutationKey).join("/");
 
-  mutation.mutationFn = (params: Record<string, string>) => doFetch(dispatchEventMsg, endpoint, params, init);
+  mutation.mutationFn = (data: object) => doFetch(dispatchEventMsg, endpoint, {body: JSON.stringify(data), ...init});
 
-  return useMutation<T, Error, Record<string, string>, unknown>(mutation);
+  return useMutation<T, Error, object, unknown>(mutation);
 }
 
 export function useGetAchievements(): UseQueryResult<AchievementExtendedType[]> {
@@ -109,5 +107,7 @@ export function useCreateTeam(): SpecificUseMutationResult<MyAchievementTeamType
   return useMakeMutation({
     mutationKey: ["achievements", "team", "new"],
     onSuccess: (data) => queryClient?.setQueryData(["achievements", "team"], () => data)
+  }, {
+    method: "POST"
   });
 }

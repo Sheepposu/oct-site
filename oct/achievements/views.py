@@ -20,6 +20,25 @@ def _serialize_team(team, many=False, include=None):
     return TeamSerializer(team, many).serialize(include=["players.user"]+include)
 
 
+def error(msg: str, status=400):
+    return JsonResponse({"error": msg}, status=status, safe=False)
+
+
+def parse_body(body: bytes, require_has: tuple | list):
+    try:
+        data = json.loads(body.decode("utf-8"))
+        if not isinstance(data, dict):
+            return
+        
+        for require in require_has:
+            if require not in data:
+                return
+
+        return data
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return
+
+
 def achievements(req):
     with connection.cursor() as cursor:
         cursor.execute(
@@ -80,12 +99,12 @@ def teams(req):
     
 @require_POST
 def join_team(req):
-    invite = req.POST.get("invite")
-    if invite is None:
+    data = parse_body(req.body, ("invite",))
+    if data is None or data["invite"] is None:
         return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
     
     try:
-        team = Team.select_with(("players.user",), invite=invite)[0]
+        team = Team.select_with(("players.user",), invite=data["invite"])[0]
     except IndexError:
         return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
     
@@ -121,8 +140,8 @@ def leave_team(req):
 
 @require_POST
 def create_team(req):
-    name = req.POST.get("name")
-    if name is None or len(name) == 0 or len(name) > 32:
+    data = parse_body(req.body, ("name",))
+    if data is None or (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
         return JsonResponse({"error": "invalid name"}, status=400, safe=False)
     
     player = Player.objects.filter(user_id=req.user.id).first()
