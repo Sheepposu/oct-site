@@ -19,13 +19,18 @@ export default function App() {
           }}
         >
           <p
-            style={{ fontWeight: 900, fontStyle: "italic", fontSize: "150px" }}
+            style={{
+              fontWeight: 900,
+              fontStyle: "italic",
+              fontSize: "60px",
+              textAlign: "center",
+            }}
           >
             OFFLINE CHAT TOURNAMENT
           </p>
           <p
             style={{
-              fontSize: "30px",
+              fontSize: "20px",
               fontWeight: "bold",
               marginBottom: "30px",
             }}
