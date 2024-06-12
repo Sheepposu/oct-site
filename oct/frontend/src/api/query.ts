@@ -4,6 +4,7 @@ import { AchievementTeamType, MyAchievementTeamType } from "./types/AchievementT
 import { useContext } from "react";
 import { EventContext, EventStateType } from "src/contexts/EventContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
+import { AchievementPlayerType } from "./types/AchievementPlayerType";
 
 
 function getUrl(endpoint: string): string {
@@ -89,7 +90,7 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
     mutationKey: ["achievements", "team", "leave"],
     onSuccess: () => {
       queryClient?.setQueryData(["achievements", "team"], () => null);
-      queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => old.filter((team) => team.invite === undefined))
+      queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => old.filter((team) => team.invite === undefined || (team.players as AchievementPlayerType[]).length > 1))
     }
   }, {
     method: "DELETE"
