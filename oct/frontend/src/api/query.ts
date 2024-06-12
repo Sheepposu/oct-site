@@ -101,7 +101,9 @@ export function useJoinTeam(): SpecificUseMutationResult<MyAchievementTeamType> 
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation({
     mutationKey: ["achievements", "team", "join"],
-    onSuccess: (data) => queryClient?.setQueryData(["achievements", "team"], () => data)
+    onSuccess: (data) => {
+      queryClient?.setQueryData(["achievements", "team"], () => data);
+    }
   }, {
     method: "POST"
   });
