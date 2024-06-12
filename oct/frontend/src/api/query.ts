@@ -89,8 +89,24 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
   return useMakeMutation({
     mutationKey: ["achievements", "team", "leave"],
     onSuccess: () => {
-      queryClient?.setQueryData(["achievements", "team"], () => null);
-      queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => old.filter((team) => team.invite === undefined || (team.players as AchievementPlayerType[]).length > 1))
+      // remove players or team
+      queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => {
+        const teams = [];
+        for (const team of old) {
+          if (team.invite !== undefined) {
+            if ((team.players as AchievementPlayerType[]).length === 1) {
+              continue;
+            }
+
+            team.players = undefined;
+            team.invite = undefined;
+          }
+
+          teams.push(team);
+        }
+
+        return teams;
+      });
     }
   }, {
     method: "DELETE"
@@ -102,7 +118,13 @@ export function useJoinTeam(): SpecificUseMutationResult<MyAchievementTeamType> 
   return useMakeMutation({
     mutationKey: ["achievements", "team", "join"],
     onSuccess: (data) => {
-      queryClient?.setQueryData(["achievements", "team"], () => data);
+      // update team data for team being joined
+      queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => old.map((team) => {
+        if (team.id === data.id) {
+          return data;
+        }
+        return team;
+      }));
     }
   }, {
     method: "POST"
@@ -114,7 +136,7 @@ export function useCreateTeam(): SpecificUseMutationResult<MyAchievementTeamType
   return useMakeMutation({
     mutationKey: ["achievements", "team", "new"],
     onSuccess: (data) => {
-      queryClient?.setQueryData(["achievements", "team"], () => data);
+      // add team to team list
       queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => old.concat([data]));
     }
   }, {

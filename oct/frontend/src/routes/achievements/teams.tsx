@@ -21,6 +21,13 @@ export default function TeamsCard() {
 
   let ownTeam: MyAchievementTeamType | null = null;
   let ownPlacement: number | null = null;
+  if (Array.isArray(teams))
+    for (const [i, team] of teams.entries()) {
+      if (team.invite !== undefined) {
+        ownTeam = team as MyAchievementTeamType;
+        ownPlacement = i + 1;
+      }
+    }
 
   const leaveTeam = useLeaveTeam();
   const joinTeam = useJoinTeam();
@@ -36,7 +43,7 @@ export default function TeamsCard() {
 
     createTeam.mutate({name}, {
       onSuccess: () => createTeam.reset()
-    })
+    });
   };
 
   const onJoinTeam = (evt: FormEvent<HTMLFormElement>) => {
@@ -50,13 +57,13 @@ export default function TeamsCard() {
     joinTeam.mutate({invite}, {
       onSuccess: () => joinTeam.reset()
     });
-  }
+  };
 
   const onLeaveTeam = () => {
     leaveTeam.mutate({}, {
       onSuccess: () => leaveTeam.reset()
     });
-  }
+  };
 
   const copyInvite = () => {
     navigator.clipboard.writeText((ownTeam as MyAchievementTeamType).invite);
@@ -64,15 +71,7 @@ export default function TeamsCard() {
       type: "info",
       msg: "Copied team code to clipboard!",
     });
-  }
-
-  if (Array.isArray(teams))
-    for (const [i, team] of teams.entries()) {
-      if (team.invite !== undefined) {
-        ownTeam = team as MyAchievementTeamType;
-        ownPlacement = i + 1;
-      }
-    }
+  };
 
   return (
     <div className="info-container">
@@ -115,7 +114,7 @@ export default function TeamsCard() {
                 </Button>
               ) : (
                 <form onSubmit={onCreateTeam}>
-                  <Button type="submit" color="#06c926" unavailable={createTeam.isPending}>
+                  <Button type="submit" color="#06c926" unavailable={createTeam.isPending || joinTeam.isPending}>
                     Create Team
                   </Button>
                   <input
@@ -142,7 +141,7 @@ export default function TeamsCard() {
                     name="code"
                     style={{ marginRight: "8px" }}
                   />
-                  <Button type="submit" unavailable={joinTeam.isPending}>
+                  <Button type="submit" unavailable={joinTeam.isPending || createTeam.isPending}>
                     Join Team
                   </Button>
                 </form>
