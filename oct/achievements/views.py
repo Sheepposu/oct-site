@@ -1,7 +1,7 @@
 import json
 from django.db import connection
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.conf import settings
 
 import secrets
@@ -80,14 +80,14 @@ def teams(req):
     
 @require_POST
 def join_team(req):
-    invite = json.loads(req.body)['code']
-    print(invite)
-    team = None
-    if invite is not None:
-        try:
-            team = Team.select_with(("players.user",), invite=invite)[0]
-        except IndexError:
-            return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
+    invite = req.POST.get("invite")
+    if invite is None:
+        return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
+    
+    try:
+        team = Team.select_with(("players.user",), invite=invite)[0]
+    except IndexError:
+        return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
     
     player = Player.objects.filter(user_id=req.user.id).first()
     if player is not None:
@@ -99,7 +99,7 @@ def join_team(req):
     return JsonResponse({"data": _serialize_team(team)}, safe=False)
 
 
-@require_POST
+@require_http_methods(["DELETE"])
 def leave_team(req):
     # TODO: maybe make this into a postgresql function
     team = None
@@ -121,8 +121,8 @@ def leave_team(req):
 
 @require_POST
 def create_team(req):
-    name = json.loads(req.body)['name']
-    if name is None or len(name) == 0 or len(name) > 31:
+    name = req.POST.get("name")
+    if name is None or len(name) == 0 or len(name) > 32:
         return JsonResponse({"error": "invalid name"}, status=400, safe=False)
     
     player = Player.objects.filter(user_id=req.user.id).first()
