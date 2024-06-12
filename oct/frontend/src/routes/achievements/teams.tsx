@@ -1,7 +1,7 @@
-import { useContext, useState } from "react";
+import { FormEvent, useContext } from "react";
 import AnimatedPage from "src/AnimatedPage";
-import { useGetTeams } from "src/api/query";
-import { AchievementTeamType } from "src/api/types/AchievementTeamType";
+import { useCreateTeam, useGetTeams, useJoinTeam, useLeaveTeam } from "src/api/query";
+
 import "src/assets/css/achievements/teams.css";
 import "src/assets/css/tournaments/tournament/index.css";
 import "src/assets/css/main.css";
@@ -10,12 +10,7 @@ import Button from "src/components/Button";
 import TeamCard from "src/components/achievements/TeamCard";
 import { SessionContext } from "src/contexts/SessionContext";
 import { EventContext } from "src/contexts/EventContext";
-
-function checkLength(min: number, max: number, input: string) {
-  const r = input.length > min || input.length < max;
-  console.log(r);
-  return input.length < min || input.length > max;
-}
+import { MyAchievementTeamType } from "src/api/types/AchievementTeamType";
 
 export default function TeamsCard() {
   const session = useContext(SessionContext);
@@ -24,127 +19,57 @@ export default function TeamsCard() {
   const teamsResponse = useGetTeams();
   const teams = teamsResponse.data;
 
-  let ownTeam = null;
-  let ownPlacement = null;
+  let ownTeam: MyAchievementTeamType | null = null;
+  let ownPlacement: number | null = null;
 
-  const [isPending, setIsPending] = useState<boolean>(false);
+  const leaveTeam = useLeaveTeam();
+  const joinTeam = useJoinTeam();
+  const createTeam = useCreateTeam();
 
-  async function leaveTeam() {
-    setIsPending(true);
-    const response = await fetch("/api/achievements/team/leave/", {
-      method: "POST",
-    });
-    if (response.status === 200) {
-      teamsResponse.refetch();
-      dispatchEventMsg({
-        type: "info",
-        msg: "Successfully left team.",
-      });
-    } else {
-      dispatchEventMsg({
-        type: "error",
-        msg: `Failed to leave team:`,
-      });
+  const onCreateTeam = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    
+    const name = (new FormData(evt.currentTarget)).get("name") as string;
+    if (name.length < 1 || name.length > 32) {
+      return dispatchEventMsg({type: "error", msg: "Team name must be between 1 and 32 characters"});
     }
-    setIsPending(false);
-  }
 
-  type joinTeamResponseType = {
-    error?: string;
-    data?: AchievementTeamType;
+    createTeam.mutate({name}, {
+      onSuccess: () => createTeam.reset()
+    })
   };
 
-  async function joinTeam(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsPending(true);
+  const onJoinTeam = (evt: FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
-    const code = formData.get("code") as string;
-
-    const response = (await fetch("/api/achievements/team/join/", {
-      method: "POST",
-      body: JSON.stringify({
-        code: code,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).catch((err) => {
-      dispatchEventMsg({
-        type: "error",
-        msg: `An error occured while joining the team: ${err}`,
-      });
-      setIsPending(false);
-      return;
-    })) as Response;
-
-    const data: joinTeamResponseType = await response.json();
-
-    if (data.error) {
-      dispatchEventMsg({
-        type: "error",
-        msg: `An error occured while joining: ${data.error}`,
-      });
-      setIsPending(false);
-      return;
+    const invite = (new FormData(evt.currentTarget)).get("code") as string;
+    if (invite === "") {
+      return dispatchEventMsg({type: "error", msg: "Input an invite code first"});
     }
 
-    dispatchEventMsg({
-      type: "info",
-      msg: `Successfully joined team ${data.data?.name}`,
+    joinTeam.mutate({invite}, {
+      onSuccess: () => joinTeam.reset()
     });
-
-    teamsResponse.refetch();
-    setIsPending(false);
   }
 
-  async function createTeam(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsPending(true);
-
-    const formData = new FormData(event.currentTarget);
-    const teamName = formData.get("name") as string;
-
-    if (checkLength(3, 32, teamName)) {
-      dispatchEventMsg({
-        type: "error",
-        msg: "Team name needs to be between 3 and 32 characters",
-      });
-      setIsPending(false);
-      return;
-    }
-
-    const response = await fetch("/api/achievements/team/new/", {
-      method: "POST",
-      body: JSON.stringify({
-        name: teamName,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+  const onLeaveTeam = () => {
+    leaveTeam.mutate({}, {
+      onSuccess: () => leaveTeam.reset()
     });
+  }
 
-    if (response.status !== 200) {
-      dispatchEventMsg({
-        type: "error",
-        msg: "Team creation failed, most likely chose an already existing team name.",
-      });
-      teamsResponse.refetch();
-      setIsPending(false);
-      return;
-    }
-
+  const copyInvite = () => {
+    navigator.clipboard.writeText((ownTeam as MyAchievementTeamType).invite);
     dispatchEventMsg({
       type: "info",
-      msg: `Team ${teamName} successfully created!`,
+      msg: "Copied team code to clipboard!",
     });
-    setIsPending(false);
   }
 
   if (Array.isArray(teams))
     for (const [i, team] of teams.entries()) {
       if (team.invite !== undefined) {
-        ownTeam = team;
+        ownTeam = team as MyAchievementTeamType;
         ownPlacement = i + 1;
       }
     }
@@ -183,14 +108,14 @@ export default function TeamsCard() {
               {ownTeam !== null ? (
                 <Button
                   color="#fc1e1e"
-                  onClick={leaveTeam}
-                  unavailable={isPending}
+                  onClick={onLeaveTeam}
+                  unavailable={leaveTeam.isPending}
                 >
                   Leave Team
                 </Button>
               ) : (
-                <form onSubmit={createTeam}>
-                  <Button type="submit" color="#06c926" unavailable={isPending}>
+                <form onSubmit={onCreateTeam}>
+                  <Button type="submit" color="#06c926" unavailable={createTeam.isPending}>
                     Create Team
                   </Button>
                   <input
@@ -206,25 +131,18 @@ export default function TeamsCard() {
               {ownTeam !== null ? (
                 <Button
                   color="#06c926"
-                  unavailable={isPending}
-                  onClick={() => {
-                    navigator.clipboard.writeText(ownTeam.invite);
-                    dispatchEventMsg({
-                      type: "info",
-                      msg: "Copied team code to clipboard!",
-                    });
-                  }}
+                  onClick={copyInvite}
                 >
                   Copy Team Code
                 </Button>
               ) : (
-                <form onSubmit={joinTeam}>
+                <form onSubmit={onJoinTeam}>
                   <input
                     type="text"
                     name="code"
                     style={{ marginRight: "8px" }}
                   />
-                  <Button type="submit" unavailable={isPending}>
+                  <Button type="submit" unavailable={joinTeam.isPending}>
                     Join Team
                   </Button>
                 </form>

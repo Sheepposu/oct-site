@@ -7,12 +7,13 @@ export type AchievementTeamType = {
   id: number;
   name: string;
   icon: string | null;
-  invite: string;
+  invite?: string;
   points: number;
-  players: AchievementPlayerType[];
+  players?: AchievementPlayerType[];
 };
 
 export type MyAchievementTeamType = {
   // includes player with list of completed achievements
   players: AchievementPlayerExtendedType[];
+  invite: string;
 } & AchievementTeamType;
