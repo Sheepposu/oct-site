@@ -6,6 +6,7 @@ import {
   useJoinTeam,
   useLeaveTeam,
 } from "src/api/query";
+import { Helmet } from "react-helmet";
 
 import "src/assets/css/achievements/teams.css";
 import "src/assets/css/tournaments/tournament/index.css";
@@ -95,6 +96,9 @@ export default function TeamsCard() {
 
   return (
     <div className="info-container">
+      <Helmet>
+        <title>OCAH Teams + Info</title>
+      </Helmet>
       <h1 className="info-title">Teams</h1>
       <p className="info-subtitle">Your Team</p>
       <div className="info-your-team-container">
