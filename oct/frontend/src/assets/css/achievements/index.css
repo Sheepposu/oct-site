@@ -15,7 +15,7 @@ body {
 
 .card-container {
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
 }
 
 .info-container {
@@ -93,6 +93,13 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.info-buttons-divider {
+  padding: 3px;
+  margin: 4px;
+  background-color: #dbdbdb;
+  border-radius: 15px;
 }
 
 @media (max-width: 1200px) {

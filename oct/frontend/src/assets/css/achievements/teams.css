@@ -11,7 +11,7 @@
 .teams-card-container {
   width: 100%;
 
-  background-color: #cbcbcb;
+  background-color: #f8f8f8;
   border-radius: var(--border-rounding);
   box-shadow: var(--box-shadow);
 
@@ -23,7 +23,7 @@
 .teams-card-info-container {
   width: 100%;
   height: 50px;
-  
+
   background-color: white;
   border-radius: var(--border-rounding);
 
