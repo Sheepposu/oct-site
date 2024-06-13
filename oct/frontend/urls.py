@@ -12,7 +12,8 @@ def index_view(req):
             "isAuthenticated": req.user.is_authenticated,
             "user": None,
             "authUrl": settings.OSU_AUTH_URL,
-            "wsUri": settings.ACHIEVEMENTS_WS_URI
+            "wsUri": settings.ACHIEVEMENTS_WS_URI,
+            "debug": settings.DEBUG
         }
     }
 

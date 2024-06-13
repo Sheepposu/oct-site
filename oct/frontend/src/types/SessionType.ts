@@ -5,4 +5,5 @@ export type Session = {
   user: UserExtendedType | null;
   authUrl: string;
   wsUri: string;
+  debug: boolean;
 };
