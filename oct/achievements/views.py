@@ -18,15 +18,17 @@ from .serializers import *
 EVENT_START = 1718409600
 
 
-def _serialize_team(team, many=False):
+def serialize_full_team(team, many=False):
     return TeamSerializer(team, many).serialize(include=["players.user", "players.completions.achievement_id"])
 
 
-def select_my_team(**kwargs):
-    team = Team.select_with(("players.user", "players.completions"), **kwargs)
-    if len(team) == 0:
+def select_teams(many=False, **kwargs):
+    teams = Team.select_with(("players.user", "players.completions"), **kwargs)
+    if many:
+        return teams
+    if len(teams) == 0:
         return
-    return team
+    return teams[0]
 
 
 def error(msg: str, status=400):
@@ -53,7 +55,7 @@ def parse_body(body: bytes, require_has: tuple | list):
 
 
 def achievements(req):
-    if time.time() < EVENT_START:
+    if time.time() < EVENT_START and not settings.DEBUG:
         return error("cannot get achievements before event starts")
 
     with connection.cursor() as cursor:
@@ -83,23 +85,19 @@ def team(req):
     if not req.user.is_authenticated:
         return success(None)
     
-    team = select_my_team(players__user_id=req.user.id)
+    team = select_teams(players__user_id=req.user.id)
     if team is None:
         return success(None)
     
-    team = _serialize_team(team[0])
+    team = serialize_full_team(team[0])
     return success(team)
 
 def teams(req):
-    teams = Team.select_with(("players.user",))
-
     serialized_teams = [
-        TeamSerializer(team).serialize(*(
-            (None, ["players.user"])
-            if any(map(lambda p: p.user.id == req.user.id, team.players))
-            else (["invite"], None)
-        ))
-        for team in teams
+        serialize_full_team(team)
+        if any(map(lambda p: p.user.id == req.user.id, team.players)) else
+        TeamSerializer(team).serialize(exclude=["invite"])
+        for team in select_teams(many=True)
     ]
     sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
 
@@ -111,7 +109,7 @@ def join_team(req):
     if data is None or data["invite"] is None:
         return error("invalid invite")
     
-    team = select_my_team(invite=data["invite"])
+    team = select_teams(invite=data["invite"])
     if team is None:
         return error("invalid invite")
     
@@ -125,7 +123,7 @@ def join_team(req):
     player = Player(user=req.user, team_id=team.id)
     player.save()
     team.players.append(player)
-    return success(_serialize_team(team))
+    return success(serialize_full_team(team))
 
 
 @require_http_methods(["DELETE"])
