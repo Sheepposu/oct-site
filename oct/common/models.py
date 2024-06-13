@@ -3,6 +3,8 @@ from django.db import connection
 
 from typing import Iterable
 
+from collections import defaultdict
+
 
 __all__ = ("RelationCachingModel",)
 
@@ -52,30 +54,34 @@ def _get_columns(model, related_fields: Iterable, table_as=None):
 def _parse_rows(rows, columns, many):
     model, columns = columns
 
-    def iter_row_groupings():
-        pk_i = 0
-        for item in columns:
-            if item[0].primary_key:
-                break
-            if isinstance(item[1], str):
-                pk_i += 1
-        last_pk = None
-        for i, row in enumerate(rows):
-            if row[pk_i] != last_pk:
-                yield i
-                last_pk = row[pk_i]
-        yield len(rows)
+    grouped_rows = defaultdict(list)
+
+    pk_i = 0
+    for item in columns:
+        if item[0].primary_key:
+            break
+        if isinstance(item[1], str):
+            pk_i += 1
+
+    for row in rows:
+        grouped_rows[row[pk_i]].append(row)
+
+    # def iter_row_groupings():
+    #     pk_i = 0
+    #     for item in columns:
+    #         if item[0].primary_key:
+    #             break
+    #         if isinstance(item[1], str):
+    #             pk_i += 1
+    #     last_pk = None
+    #     for i, row in enumerate(rows):
+    #         if row[pk_i] != last_pk:
+    #             yield i
+    #             last_pk = row[pk_i]
+    #     yield len(rows)
 
     objs = []
-
-    row_groupings = iter_row_groupings()
-    next_row_grouping_i = next(row_groupings)
-    for row_i in range(len(rows)):
-        if row_i != next_row_grouping_i:
-            continue
-
-        next_row_grouping_i = next(row_groupings)
-
+    for rows in grouped_rows.values():
         values = {}
         reverse_values = {}
         value_i = 0
@@ -83,7 +89,7 @@ def _parse_rows(rows, columns, many):
             if isinstance(child_columns, tuple):
                 is_reverse = not isinstance(field, ForeignKey)
                 (reverse_values if is_reverse else values)[field.name] = _parse_rows(
-                    [row[value_i:] for row in rows[row_i:next_row_grouping_i]],
+                    [row[value_i:] for row in rows],
                     child_columns,
                     is_reverse
                 )
@@ -91,7 +97,7 @@ def _parse_rows(rows, columns, many):
                 count_values = lambda columns: sum([1 if isinstance(column[1], str) else count_values(column[1]) for column in columns[1]])
                 value_i += count_values(child_columns)
             else:
-                value = rows[row_i][value_i]
+                value = rows[0][value_i]
                 try:
                     value = field.from_db_value(value, None, None)
                 except AttributeError:
