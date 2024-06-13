@@ -8,20 +8,33 @@ import secrets
 import struct
 import random
 import base64
+import time
 from nacl.secret import SecretBox
 
 from .models import *
 from .serializers import *
 
 
-def _serialize_team(team, many=False, include=None):
-    if include is None:
-        include = []
-    return TeamSerializer(team, many).serialize(include=["players.user"]+include)
+EVENT_START = 1718409600
+
+
+def _serialize_team(team, many=False):
+    return TeamSerializer(team, many).serialize(include=["players.user", "players.completions.achievement_id"])
+
+
+def select_my_team(**kwargs):
+    team = Team.select_with(("players.user", "players.completions"), **kwargs)
+    if len(team) == 0:
+        return
+    return team
 
 
 def error(msg: str, status=400):
     return JsonResponse({"error": msg}, status=status, safe=False)
+
+
+def success(data, status=200):
+    return JsonResponse({"data": data}, status=status, safe=False)
 
 
 def parse_body(body: bytes, require_has: tuple | list):
@@ -40,6 +53,9 @@ def parse_body(body: bytes, require_has: tuple | list):
 
 
 def achievements(req):
+    if time.time() < EVENT_START:
+        return error("cannot get achievements before event starts")
+
     with connection.cursor() as cursor:
         cursor.execute(
             """
@@ -53,34 +69,26 @@ def achievements(req):
             GROUP BY achievements_achievement.id
             """
         )
-        return JsonResponse(
-            {"data": [{
+        return success(
+            [{
                 "id": int(achievement[0]),
                 "name": achievement[1],
                 "category": achievement[2],
                 "completions": achievement[3]
-            } for achievement in cursor.fetchall()]},
-            safe=False
+            } for achievement in cursor.fetchall()]
         )
 
 
 def team(req):
     if not req.user.is_authenticated:
-        return JsonResponse({"data": None}, safe=False)
+        return success(None)
     
-    team = Team.select_with((
-        "players.user",
-        "players.completions"
-    ), players__user_id=req.user.id)
-
-    if team == []:
-        return JsonResponse({"data": None}, safe=False)
+    team = select_my_team(players__user_id=req.user.id)
+    if team is None:
+        return success(None)
     
-    team = _serialize_team(team[0], include=[
-        "players.completions",
-        "players.completions.achievement_id"
-    ])
-    return JsonResponse({"data": team}, safe=False)
+    team = _serialize_team(team[0])
+    return success(team)
 
 def teams(req):
     teams = Team.select_with(("players.user",))
@@ -95,30 +103,29 @@ def teams(req):
     ]
     sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
 
-    return JsonResponse({"data": sorted_teams}, safe=False)
+    return success(sorted_teams)
     
 @require_POST
 def join_team(req):
     data = parse_body(req.body, ("invite",))
     if data is None or data["invite"] is None:
-        return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
+        return error("invalid invite")
     
-    try:
-        team = Team.select_with(("players.user",), invite=data["invite"])[0]
-    except IndexError:
-        return JsonResponse({"error": "invalid invite"}, status=400, safe=False)
+    team = select_my_team(invite=data["invite"])
+    if team is None:
+        return error("invalid invite")
     
     if len(team.players) == 5:
         return error("That team is already full")
     
     player = Player.objects.filter(user_id=req.user.id).first()
     if player is not None:
-        return JsonResponse({"error": "already on a team"}, status=400, safe=False)
+        return error("already on a team")
     
     player = Player(user=req.user, team_id=team.id)
     player.save()
     team.players.append(player)
-    return JsonResponse({"data": _serialize_team(team)}, safe=False)
+    return success(_serialize_team(team))
 
 
 @require_http_methods(["DELETE"])
@@ -128,7 +135,7 @@ def leave_team(req):
     if req.user.is_authenticated:
         team = Team.select_with(("players.user",), players__user_id=req.user.id)[0]
     if team is None:
-        return JsonResponse({"error": "not on a team"}, status=400, safe=False)
+        return error("not on team")
     
     player = next(filter(lambda player: player.user.id == req.user.id, team.players))
     
@@ -138,25 +145,25 @@ def leave_team(req):
         team.delete()
     else:
         player.delete()
-    return JsonResponse({"data": None}, safe=False)
+    return success(None)
 
 
 @require_POST
 def create_team(req):
     data = parse_body(req.body, ("name",))
     if data is None or (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
-        return JsonResponse({"error": "invalid name"}, status=400, safe=False)
+        return error("invalid name")
     
     player = Player.objects.filter(user_id=req.user.id).first()
     if player is not None:
-        return JsonResponse({"error": "already on a team"}, status=400, safe=False)
+        return error("already on a team")
     
     try:
         invite = secrets.token_urlsafe(12)
         team = Team(name=name, icon="", invite=invite)
         team.save()
-    except Exception as e:
-        return JsonResponse({"error": "team name taken"}, status=400, safe=False)
+    except:
+        return error("team name taken")
     
     player = Player(user=req.user, team_id=team.id)
     player.save()
@@ -165,7 +172,7 @@ def create_team(req):
     player = PlayerSerializer(player).serialize(include=["user"])
     player["completions"] = 0
     team["players"] = [player]
-    return JsonResponse({"data": team}, safe=False)
+    return success(team)
 
 
 def get_auth_packet(req):
@@ -174,7 +181,7 @@ def get_auth_packet(req):
     
     player = Player.objects.filter(user_id=req.user.id).first()
     if player is None:
-        return JsonResponse({"error": "no associated player"}, status=400, safe=False)
+        return error("no associated player")
     
     packet = settings.WS_CONNECTION_VALIDATOR.encode("ascii") + struct.pack("<II", 5, random.randint(0, 0xFFFFFFFF))
     msg = SecretBox(settings.SECRET_KEY[:32].encode('ascii')).encrypt(packet)
