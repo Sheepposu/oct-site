@@ -1,5 +1,4 @@
-import { useGetAchievements, useGetTeam } from "src/api/query";
-import { AchievementExtendedType } from "src/api/types/AchievementType";
+import { useGetAchievements, useGetTeams } from "src/api/query";
 import AchievementContainer from "src/components/achievements/AchievementContainer";
 import AchievementLeaderboard from "src/components/achievements/AchievementLeaderboard";
 import AchievementProgress from "src/components/achievements/AchievementProgress";
@@ -8,8 +7,20 @@ import "src/assets/css/achievements/completion.css";
 import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "src/contexts/SessionContext";
 import { Helmet } from "react-helmet";
+import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/AchievementTeamType";
 
 const EVENT_START = 1718409600000;
+
+function getMyTeam(teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
+  if (teams !== undefined)
+    for (const team of teams) {
+      if (team.invite !== undefined) {
+        return team as AchievementTeamExtendedType;
+      }
+  }
+
+  return null;
+}
 
 function HiddenAchievementCompletionPage({ time }: { time: number }) {
   const delta = EVENT_START - time;
@@ -32,17 +43,13 @@ function HiddenAchievementCompletionPage({ time }: { time: number }) {
   );
 }
 
-function LimitedAchievementCompletionPage({
-  achievements,
-}: {
-  achievements: AchievementExtendedType[] | null;
-}) {
+function LimitedAchievementCompletionPage({ team }: { team: AchievementTeamExtendedType | null }) {
   return (
     <div className="page-container">
       <Helmet>
         <title>OCAH Achievements</title>
       </Helmet>
-      <AchievementContainer achievements={achievements} team={null} />
+      <AchievementContainer team={team} />
       <div className="progress-container">
         <AchievementLeaderboard />
       </div>
@@ -50,33 +57,15 @@ function LimitedAchievementCompletionPage({
   );
 }
 
-function FullAchievementCompletionPage({
-  achievements,
-  achievementsRefetch,
-}: {
-  achievements: AchievementExtendedType[] | null;
-  achievementsRefetch: () => void;
-}) {
-  // TODO: handle errors
-  const { data, refetch } = useGetTeam();
-
-  const refetchAll = () => {
-    achievementsRefetch();
-    refetch();
-  };
-
+function FullAchievementCompletionPage({ team }: { team: AchievementTeamExtendedType | null }) {
   return (
     <div className="page-container">
       <Helmet>
         <title>OCAH Achievements</title>
       </Helmet>
-      <AchievementContainer achievements={achievements} team={data ?? null} />
+      <AchievementContainer team={team} />
       <div className="progress-container">
-        <AchievementProgress
-          achievements={achievements}
-          refetch={refetchAll}
-          team={data ?? null}
-        />
+        <AchievementProgress team={team} />
         <AchievementLeaderboard />
       </div>
     </div>
@@ -85,12 +74,15 @@ function FullAchievementCompletionPage({
 
 export default function AchievementCompletionPage() {
   const session = useContext(SessionContext);
-  const { data, refetch } = useGetAchievements();
+
+  useGetAchievements(false);
+  const { data: teams } = useGetTeams();
+  const team = getMyTeam(teams);
+
   const [time, setTime] = useState<number>(Date.now());
 
-  // TODO: fix error happening when timer is done
   useEffect(() => {
-    if (time >= EVENT_START) {
+    if (time >= EVENT_START || session.debug) {
       return;
     }
 
@@ -98,13 +90,13 @@ export default function AchievementCompletionPage() {
     return () => clearInterval(intervalId);
   });
 
-  if (time < EVENT_START) {
+  if (time < EVENT_START && !session.debug) {
     return <HiddenAchievementCompletionPage time={time} />;
   }
 
   return (
-    session.isAuthenticated
-      ? FullAchievementCompletionPage
-      : LimitedAchievementCompletionPage
-  )({ achievements: data ?? null, achievementsRefetch: refetch });
+    team !== null
+      ? <FullAchievementCompletionPage team={team} />
+      : <LimitedAchievementCompletionPage team={team} />
+  );
 }

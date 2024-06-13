@@ -1,6 +1,6 @@
 import { MutationKey, QueryClientContext, UseMutationOptions, UseMutationResult, UseQueryResult, queryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { AchievementExtendedType } from "./types/AchievementType";
-import { AchievementTeamType, MyAchievementTeamType } from "./types/AchievementTeamType";
+import { AchievementTeamType, AchievementTeamExtendedType } from "./types/AchievementTeamType";
 import { useContext } from "react";
 import { EventContext, EventStateType } from "src/contexts/EventContext";
 import { UndefinedInitialDataOptions } from "node_modules/@tanstack/react-query/build/legacy";
@@ -66,21 +66,24 @@ export function useMakeMutation<T>(
   return useMutation<T, Error, object, unknown>(mutation);
 }
 
-export function useGetAchievements(): UseQueryResult<AchievementExtendedType[]> {
+export function useGetAchievements(enabled: boolean = true): UseQueryResult<AchievementExtendedType[]> {
   return useMakeQuery({
-    queryKey: ["achievements"]
+    queryKey: ["achievements"],
+    enabled
   });
 }
 
-export function useGetTeam(): UseQueryResult<MyAchievementTeamType | null> {
+export function useGetTeam(enabled: boolean = true): UseQueryResult<AchievementTeamExtendedType | null> {
   return useMakeQuery({
-    queryKey: ["achievements", "team"]
+    queryKey: ["achievements", "team"],
+    enabled
   });
 }
 
-export function useGetTeams(): UseQueryResult<Array<AchievementTeamType | MyAchievementTeamType>> {
+export function useGetTeams(enabled: boolean = true): UseQueryResult<Array<AchievementTeamType | AchievementTeamExtendedType>> {
   return useMakeQuery({
-    queryKey: ["achievements", "teams"]
+    queryKey: ["achievements", "teams"],
+    enabled
   });
 }
 
@@ -113,7 +116,7 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
   });
 }
 
-export function useJoinTeam(): SpecificUseMutationResult<MyAchievementTeamType> {
+export function useJoinTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation({
     mutationKey: ["achievements", "team", "join"],
@@ -131,7 +134,7 @@ export function useJoinTeam(): SpecificUseMutationResult<MyAchievementTeamType> 
   });
 }
 
-export function useCreateTeam(): SpecificUseMutationResult<MyAchievementTeamType> {
+export function useCreateTeam(): SpecificUseMutationResult<AchievementTeamExtendedType> {
   const queryClient = useContext(QueryClientContext);
   return useMakeMutation({
     mutationKey: ["achievements", "team", "new"],

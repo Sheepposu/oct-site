@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
-import { MyAchievementTeamType } from "src/api/types/AchievementTeamType";
+import { useGetAchievements, useGetTeams } from "src/api/query";
+import { AchievementTeamExtendedType } from "src/api/types/AchievementTeamType";
 import { AchievementExtendedType } from "src/api/types/AchievementType";
 import { EventContext, EventStateType } from "src/contexts/EventContext";
 import { SessionContext } from "src/contexts/SessionContext";
@@ -92,13 +93,18 @@ function onOpen(evt: MessageEvent<string>, state: WebsocketState) {
     }
 }
 
-export default function AchievementProgress({ achievements, refetch, team }: { achievements: AchievementExtendedType[] | null, refetch: () => void, team: MyAchievementTeamType | null }) {
+export default function AchievementProgress({ team }: { team: AchievementTeamExtendedType | null }) {
     const session = useContext(SessionContext);
+
     const [state, setState] = useState<WebsocketState | null>(null);
+
     const { data } = useQuery({
         queryKey: ["wsauth"],
         queryFn: () => fetch("/api/achievements/wsauth/").then((resp) => resp.json())
     });
+    const { data: achievements, refetch: refetchAchievememts } = useGetAchievements();
+    const { refetch: refetchTeams } = useGetTeams();
+
     const dispatchEventMsg = useContext(EventContext);
 
     useEffect(() => {
@@ -110,10 +116,15 @@ export default function AchievementProgress({ achievements, refetch, team }: { a
             return;
         }
 
-        connect(session.wsUri, dispatchEventMsg, data, setState, refetch);
-    }, [session.wsUri, dispatchEventMsg, data, state, refetch]);
+        const refetch = () => {
+            refetchAchievememts();
+            refetchTeams();
+        };
 
-    if (team === null || achievements === null) {
+        connect(session.wsUri, dispatchEventMsg, data, setState, refetch);
+    }, [session.wsUri, dispatchEventMsg, data, state, refetchAchievememts, refetchTeams]);
+
+    if (team === null || achievements === undefined) {
         return <div>Loading team progress...</div>;
     }
 

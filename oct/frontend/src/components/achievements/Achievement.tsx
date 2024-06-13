@@ -1,7 +1,7 @@
-import { MyAchievementTeamType } from "src/api/types/AchievementTeamType";
+import { AchievementTeamExtendedType } from "src/api/types/AchievementTeamType";
 import { AchievementExtendedType } from "src/api/types/AchievementType";
 
-export default function Achievement({achievement, team}: {achievement: AchievementExtendedType, team: MyAchievementTeamType | null}) {
+export default function Achievement({achievement, team}: {achievement: AchievementExtendedType, team: AchievementTeamExtendedType | null}) {
     function checkComplete() {
         if (team !== null) {
             for (const player of team.players) {

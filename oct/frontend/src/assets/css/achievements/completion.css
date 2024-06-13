@@ -222,8 +222,12 @@ p {
     object-fit: cover;
 }
 
-.placement-text.points {
-    margin: 0 10px;
+.points {
+    width: 70px;
+    flex-shrink: 0;
+
+    font-size: 25px;
+    text-align: center;
 }
 
 @media (max-width: 900px) {

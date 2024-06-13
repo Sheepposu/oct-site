@@ -16,7 +16,7 @@ import Button from "src/components/Button";
 import TeamCard from "src/components/achievements/TeamCard";
 import { SessionContext } from "src/contexts/SessionContext";
 import { EventContext } from "src/contexts/EventContext";
-import { MyAchievementTeamType } from "src/api/types/AchievementTeamType";
+import { AchievementTeamExtendedType } from "src/api/types/AchievementTeamType";
 
 export default function TeamsCard() {
   const session = useContext(SessionContext);
@@ -25,12 +25,12 @@ export default function TeamsCard() {
   const teamsResponse = useGetTeams();
   const teams = teamsResponse.data;
 
-  let ownTeam: MyAchievementTeamType | null = null;
+  let ownTeam: AchievementTeamExtendedType | null = null;
   let ownPlacement: number | null = null;
   if (Array.isArray(teams))
     for (const [i, team] of teams.entries()) {
       if (team.invite !== undefined) {
-        ownTeam = team as MyAchievementTeamType;
+        ownTeam = team as AchievementTeamExtendedType;
         ownPlacement = i + 1;
       }
     }
@@ -87,7 +87,7 @@ export default function TeamsCard() {
   };
 
   const copyInvite = () => {
-    navigator.clipboard.writeText((ownTeam as MyAchievementTeamType).invite);
+    navigator.clipboard.writeText((ownTeam as AchievementTeamExtendedType).invite);
     dispatchEventMsg({
       type: "info",
       msg: "Copied team code to clipboard!",

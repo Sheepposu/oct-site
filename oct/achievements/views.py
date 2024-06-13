@@ -55,7 +55,8 @@ def parse_body(body: bytes, require_has: tuple | list):
 
 
 def achievements(req):
-    if time.time() < EVENT_START and not settings.DEBUG:
+    # -1 to be sure no one requests right before
+    if time.time() < (EVENT_START - 1) and not settings.DEBUG:
         return error("cannot get achievements before event starts")
 
     with connection.cursor() as cursor:
