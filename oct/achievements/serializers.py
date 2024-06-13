@@ -23,4 +23,4 @@ class TeamSerializer:
 @serializer
 class PlayerSerializer:
     model = Player
-    fields = []
+    fields = ["id"]
