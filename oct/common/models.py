@@ -53,7 +53,6 @@ def _get_columns(model, related_fields: Iterable, table_as=None):
 
 def _parse_rows(rows, columns, many):
     model, columns = columns
-
     grouped_rows = defaultdict(list)
 
     pk_i = 0
