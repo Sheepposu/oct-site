@@ -28,7 +28,11 @@ export default function AchievementContainer({
           <>
             <div className="achievement-category">{key}</div>
             {sortedAchievements[key].map((achievement, index) => (
-              <Achievement key={index} achievement={achievement} team={team} />
+              <Achievement
+                key={index + 1}
+                achievement={achievement}
+                team={team}
+              />
             ))}
           </>
         ))
