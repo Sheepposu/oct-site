@@ -187,31 +187,31 @@ p {
     border: solid black 2px;
     border-radius: var(--border-rounding-less);
 
-    background-color: white;
+    background: linear-gradient(to right, #438efd, #438efd 50px, white 50px);
 
     overflow: hidden;
     text-wrap: nowrap;
+}
+
+.leaderboard-foreground-container.n1 {
+    background: linear-gradient(to right, #fcd703, #fcd703 50px, white 50px);
+}
+
+.leaderboard-foreground-container.n2 {
+    background: linear-gradient(to right, #e3e3e3, #e3e3e3 50px, white 50px);
+}
+
+.leaderboard-foreground-container.n3 {
+    background: linear-gradient(to right, #8a6500, #8a6500 50px, white 50px);
 }
 
 .placement-container {
     width: 50px;
     height: 100%;
     padding: 5px 15px;
+    margin-left: -2px;
 
     border-radius: var(--border-rounding-less) 0 0 var(--border-rounding-less);
-    background-color: #438efd;
-}
-
-.placement-container.first {
-    background-color: #fcd703;
-}
-
-.placement-container.second {
-    background-color: #e3e3e3;
-}
-
-.placement-container.third {
-    background-color: #8a6500;
 }
 
 .placement-img {

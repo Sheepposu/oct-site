@@ -3,11 +3,10 @@ import { AchievementTeamType } from "src/api/types/AchievementTeamType";
 
 function AchievementEntry({team, placement}: {team: AchievementTeamType, placement: number}) {
     // const icon = team.icon === null || team.icon === "" ? "https://osu.ppy.sh/images/layout/avatar-guest@2x.png" : team.icon;
-    const placementCls = "placement-container" + ([" first", " second", " third"][placement-1] ?? "");
     return (
         <div className="leaderboard-entry">
-            <div className="leaderboard-foreground-container">
-                <div className={placementCls}>
+            <div className={`leaderboard-foreground-container n${placement}`}>
+                <div className="placement-container">
                     <p>#{placement}</p>
                 </div>
                 {/* <img className="placement-img" src={icon}></img> */}
