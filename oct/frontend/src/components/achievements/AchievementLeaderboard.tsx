@@ -12,7 +12,7 @@ export default function AchievementLeaderboard() {
         <div>Loading...</div>
       ) : isSuccess ? (
         data?.map((team, index) => (
-          <TeamCard key={index} team={team} placement={index} />
+          <TeamCard key={index} team={team} placement={index + 1} />
         ))
       ) : (
         <div>Error</div>

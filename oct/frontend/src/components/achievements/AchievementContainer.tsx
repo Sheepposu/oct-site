@@ -33,9 +33,6 @@ export default function AchievementContainer({
           </>
         ))
       ) : (
-        // achievements.map((achievement, index) =>
-        //   <Achievement key={index} achievement={achievement} team={team} />
-        // )
         <div>Loading achievements...</div>
       )}
     </div>
