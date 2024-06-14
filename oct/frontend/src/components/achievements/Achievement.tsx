@@ -34,13 +34,22 @@ export default function Achievement({achievement, team}: {achievement: Achieveme
             <div className={infoCls}>
                 <div className="achievement-info">
                     <h1>[{achievement.category}] {achievement.name}</h1>
-                    <p>{achievement.description}</p>
+                    <p>{achievement.completions} completions | {achievement.description}</p>
                 </div>
                 {infoLabel}
             </div>
-            <div className="achievement-details-container">
-
-            </div>
+            { achievement.beatmap === null ? "" :
+            <a href={`https://osu.ppy.sh/b/${achievement.beatmap.id}`} target="_blank">
+                <div className="achievement-details-container">
+                    <img className="achievement-details-cover" src={achievement.beatmap.cover}></img>
+                    <div className="achievement-details-beatmap-info">
+                        <p className="achievement-details-beatmap-info-text">{achievement.beatmap.artist} - {achievement.beatmap.title}</p>
+                        <p className="achievement-details-beatmap-info-text">[{achievement.beatmap.version}]</p>
+                    </div>
+                    <h1 className="achievement-details-star-rating">{achievement.beatmap.star_rating}*</h1>
+                </div>
+            </a>
+            }
         </div>
     );
 }

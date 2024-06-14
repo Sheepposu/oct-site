@@ -68,10 +68,16 @@ def achievements(req):
                 category,
                 description,
                 beatmap_id,
-                COUNT(achievements_achievementcompletion.achievement_id)
+                artist,
+                title,
+                version,
+                cover,
+                star_rating,
+            	COUNT(achievements_achievementcompletion.achievement_id)
             FROM achievements_achievement
             LEFT JOIN achievements_achievementcompletion ON (achievements_achievementcompletion.achievement_id = achievements_achievement.id)
-            GROUP BY achievements_achievement.id
+            LEFT JOIN achievements_beatmapinfo ON (achievements_beatmapinfo.id = achievements_achievement.beatmap_id)
+            GROUP BY achievements_achievement.id, achievements_beatmapinfo.id
             """
         )
         return success(
@@ -80,8 +86,15 @@ def achievements(req):
                 "name": achievement[1],
                 "category": achievement[2],
                 "description": achievement[3],
-                "beatmap_id": achievement[4],
-                "completions": achievement[5]
+                "beatmap": {
+                    "id": achievement[4],
+                    "artist": achievement[5],
+                    "title": achievement[6],
+                    "version": achievement[7],
+                    "cover": achievement[8],
+                    "star_rating": achievement[9]
+                },
+                "completions": achievement[10]
             } for achievement in cursor.fetchall()]
         )
 

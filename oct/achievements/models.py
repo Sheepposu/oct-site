@@ -10,13 +10,27 @@ class Team(RelationCachingModel):
     icon = models.CharField(max_length=64, null=True)
     invite = models.CharField(max_length=16)
     points = models.PositiveIntegerField(default=0)
-    
+
+
+class BeatmapInfo(RelationCachingModel):
+    id = models.PositiveIntegerField(primary_key=True)
+    artist = models.CharField()
+    version = models.CharField()
+    title = models.CharField()
+    cover = models.CharField()
+    star_rating = models.FloatField()
+
 
 class Achievement(RelationCachingModel):
     name = models.CharField(max_length=32)
     category = models.CharField(max_length=32)
     description = models.CharField(max_length=256)
-    beatmap_id = models.PositiveIntegerField(null=True)
+    beatmap = models.ForeignKey(
+        BeatmapInfo,
+        related_name="achievements",
+        on_delete=models.PROTECT,
+        null=True
+    )
 
 
 class AchievementCompletion(RelationCachingModel):
