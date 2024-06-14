@@ -87,6 +87,9 @@ function onCompletedAchievement(data: RefreshReturnType, state: WebsocketState) 
                                 time_completed: achievement.time
                             })))
                         });
+
+                        myTeam.points = data.score;
+
                         continue;
                     }
                     players.push(player);
