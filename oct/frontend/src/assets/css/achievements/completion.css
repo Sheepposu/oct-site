@@ -80,6 +80,8 @@ p {
 }
 
 .progress-container {
+    min-width: 400px;
+
     display: flex;
     flex-direction: column;
     gap: 20px;
