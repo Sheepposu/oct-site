@@ -93,7 +93,7 @@ def achievements(req):
                     "version": achievement[7],
                     "cover": achievement[8],
                     "star_rating": achievement[9]
-                },
+                } if achievement[4] is not None else None,
                 "completions": achievement[10]
             } for achievement in cursor.fetchall()]
         )
@@ -199,7 +199,7 @@ def get_auth_packet(req):
     if player is None:
         return error("no associated player")
     
-    packet = settings.WS_CONNECTION_VALIDATOR.encode("ascii") + struct.pack("<II", 5, random.randint(0, 0xFFFFFFFF))
+    packet = settings.WS_CONNECTION_VALIDATOR.encode("ascii") + struct.pack("<II", player.id, random.randint(0, 0xFFFFFFFF))
     msg = SecretBox(settings.SECRET_KEY[:32].encode('ascii')).encrypt(packet)
 
     return JsonResponse({
