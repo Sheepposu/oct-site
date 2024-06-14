@@ -199,6 +199,7 @@ p {
     padding: 5px 15px;
 
     border-radius: var(--border-rounding-less) 0 0 var(--border-rounding-less);
+    background-color: #438efd;
 }
 
 .placement-container.first {
@@ -206,11 +207,11 @@ p {
 }
 
 .placement-container.second {
-    background-color: #dbdbdb;
+    background-color: #e3e3e3;
 }
 
 .placement-container.third {
-    background-color: #cc6529;
+    background-color: #8a6500;
 }
 
 .placement-img {
