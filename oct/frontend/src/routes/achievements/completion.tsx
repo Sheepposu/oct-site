@@ -14,7 +14,7 @@ const EVENT_START = 1718409600000;
 function getMyTeam(teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
   if (teams !== undefined)
     for (const team of teams) {
-      if (team.invite !== undefined) {
+      if ("invite" in team) {
         return team as AchievementTeamExtendedType;
       }
   }

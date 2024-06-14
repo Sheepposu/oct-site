@@ -1,5 +1,4 @@
-import { AchievementPlayerType } from "src/api/types/AchievementPlayerType";
-import { AchievementTeamType } from "src/api/types/AchievementTeamType";
+import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/AchievementTeamType";
 import "src/assets/css/achievements/teams.css";
 
 export default function TeamCard({
@@ -7,7 +6,7 @@ export default function TeamCard({
   hidePlayers,
   placement
 }: {
-  team: AchievementTeamType;
+  team: AchievementTeamType | AchievementTeamExtendedType;
   hidePlayers: boolean;
   placement: number;
 }) {
@@ -24,7 +23,7 @@ export default function TeamCard({
       {hidePlayers ? (
         ""
       ) : (
-        (team.players as AchievementPlayerType[]).map((player) => (
+        ((team as AchievementTeamExtendedType).players).map((player) => (
           <div className="teams-card-player">
             <img
               src={player.user.osu_avatar}

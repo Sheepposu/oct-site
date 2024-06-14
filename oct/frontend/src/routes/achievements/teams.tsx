@@ -29,7 +29,7 @@ export default function TeamsCard() {
   let ownPlacement: number | null = null;
   if (Array.isArray(teams))
     for (const [i, team] of teams.entries()) {
-      if (team.invite !== undefined) {
+      if ("invite" in team) {
         ownTeam = team as AchievementTeamExtendedType;
         ownPlacement = i + 1;
       }

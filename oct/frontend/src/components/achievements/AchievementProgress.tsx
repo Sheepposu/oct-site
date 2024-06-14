@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientContext, useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
 import { useGetAchievements } from "src/api/query";
-import { AchievementCompletionType } from "src/api/types/AchievementCompletionType";
 import { AchievementPlayerExtendedType } from "src/api/types/AchievementPlayerType";
 import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/AchievementTeamType";
 import { AchievementExtendedType } from "src/api/types/AchievementType";
@@ -75,7 +74,7 @@ function onCompletedAchievement(data: RefreshReturnType, state: WebsocketState) 
         const teams = [];
 
         for (const team of oldTeams) {
-            if (team.invite !== undefined) {
+            if ("invite" in team) {
                 const players: AchievementPlayerExtendedType[] = [];
 
                 const myTeam = team as AchievementTeamExtendedType;

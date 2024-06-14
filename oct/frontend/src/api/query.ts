@@ -93,16 +93,21 @@ export function useLeaveTeam(): SpecificUseMutationResult<null> {
     mutationKey: ["achievements", "team", "leave"],
     onSuccess: () => {
       // remove players or team
-      queryClient?.setQueryData(["achievements", "teams"], (old: AchievementTeamType[]) => {
+      queryClient?.setQueryData(["achievements", "teams"], (old: Array<AchievementTeamType | AchievementTeamExtendedType>) => {
         const teams = [];
         for (const team of old) {
-          if (team.invite !== undefined) {
-            if ((team.players as AchievementPlayerType[]).length === 1) {
-              continue;
+          if ("invite" in team) {
+            const myTeam = team as AchievementTeamExtendedType;
+            if ((myTeam.players as AchievementPlayerType[]).length !== 1) {
+              teams.push({
+                id: myTeam.id,
+                name: myTeam.name,
+                icon: myTeam.icon,
+                points: myTeam.points
+              });
             }
-
-            team.players = undefined;
-            team.invite = undefined;
+            
+            continue;
           }
 
           teams.push(team);
