@@ -1,7 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientContext, useQuery } from "@tanstack/react-query";
 import { useContext, useEffect, useState } from "react";
-import { useGetAchievements, useGetTeams } from "src/api/query";
-import { AchievementTeamExtendedType } from "src/api/types/AchievementTeamType";
+import { useGetAchievements } from "src/api/query";
+import { AchievementCompletionType } from "src/api/types/AchievementCompletionType";
+import { AchievementPlayerExtendedType } from "src/api/types/AchievementPlayerType";
+import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/AchievementTeamType";
 import { AchievementExtendedType } from "src/api/types/AchievementType";
 import { EventContext, EventStateType } from "src/contexts/EventContext";
 import { SessionContext } from "src/contexts/SessionContext";
@@ -10,18 +12,18 @@ type WebsocketState = {
     ws: WebSocket;
     dispatchEventMsg: React.Dispatch<{type: EventStateType, msg: string}>;
     onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>;
-    refetch: () => void;
+    queryClient: QueryClient;
     authenticated: boolean;
 };
 
-function connect(uri: string, dispatchEventMsg: React.Dispatch<{type: EventStateType, msg: string}>, data: object, onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>, refetch: () => void): WebsocketState {
+function connect(uri: string, dispatchEventMsg: React.Dispatch<{type: EventStateType, msg: string}>, data: object, onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>, queryClient: QueryClient): WebsocketState {
     const ws = new WebSocket(uri);
 
     const state: WebsocketState = {
         ws,
         dispatchEventMsg,
         onMutation,
-        refetch,
+        queryClient,
         authenticated: false
     };
 
@@ -37,11 +39,11 @@ function connect(uri: string, dispatchEventMsg: React.Dispatch<{type: EventState
     });
     ws.addEventListener("error", (evt) => {
         console.log(evt);
-        dispatchEventMsg({type: "error", msg: `Submission server returned an unexpected error`});
+        dispatchEventMsg({type: "error", msg: "Submission server returned an unexpected error"});
     });
     ws.addEventListener("message", (evt) => {
         console.log(evt);
-        onOpen(evt, state);
+        onMessage(evt, state);
     });
 
     onMutation({...state});
@@ -57,12 +59,67 @@ function sendSubmit(state: WebsocketState | null) {
 }
 
 type WSAchievementType = {
-    id: number,
-    name: string,
-    category: string
+    id: number;
+    name: string;
+    category: string;
+    time: string;
 };
+type RefreshReturnType = {
+    achievements: WSAchievementType[];
+    score: number;
+    you: number;
+}
 
-function onOpen(evt: MessageEvent<string>, state: WebsocketState) {
+function onCompletedAchievement(data: RefreshReturnType, state: WebsocketState) {
+    state.queryClient.setQueryData(["achievements", "teams"], (oldTeams: Array<AchievementTeamExtendedType | AchievementTeamType>) => {
+        const teams = [];
+
+        for (const team of oldTeams) {
+            if (team.invite !== undefined) {
+                const players: AchievementPlayerExtendedType[] = [];
+
+                const myTeam = team as AchievementTeamExtendedType;
+                for (const player of myTeam.players) {
+                    if (player.id === data.you) {
+                        players.push({
+                            ...player,
+                            completions: player.completions.concat(data.achievements.map((achievement) => ({
+                                achievement_id: achievement.id,
+                                time_completed: achievement.time
+                            })))
+                        });
+                        continue;
+                    }
+                    players.push(player);
+                }
+
+                myTeam.players = players;
+                teams.push(myTeam);
+                continue;
+            }
+            teams.push(team)
+        }
+
+        return teams;
+    });
+
+    const completedIds = data.achievements.map((a) => a.id);
+    state.queryClient.setQueryData(["achievements"], (oldAchievements: AchievementExtendedType[]) => {
+        const achievements = [];
+        for (const achievement of oldAchievements) {
+            if (completedIds.includes(achievement.id)) {
+                achievements.push({...achievement, completions: achievement.completions + 1});
+                continue;
+            }
+
+            achievements.push(achievement);
+        }
+
+        return achievements;
+    });
+}
+
+function onMessage(evt: MessageEvent<string>, state: WebsocketState) {
     const data = JSON.parse(evt.data);
     if (data.error !== undefined) {
         state.dispatchEventMsg({type: "error", msg: `Unexpected error from submission server: ${data.error}`});
@@ -84,8 +141,7 @@ function onOpen(evt: MessageEvent<string>, state: WebsocketState) {
             state.dispatchEventMsg({type: "info", msg: msg});
             
             if (achievements.length > 0) {
-                console.log(achievements);
-                state.refetch();
+                onCompletedAchievement(data, state);
             }
             
             break;
@@ -95,6 +151,7 @@ function onOpen(evt: MessageEvent<string>, state: WebsocketState) {
 
 export default function AchievementProgress({ team }: { team: AchievementTeamExtendedType | null }) {
     const session = useContext(SessionContext);
+    const queryClient = useContext(QueryClientContext) as QueryClient;
 
     const [state, setState] = useState<WebsocketState | null>(null);
 
@@ -102,8 +159,7 @@ export default function AchievementProgress({ team }: { team: AchievementTeamExt
         queryKey: ["wsauth"],
         queryFn: () => fetch("/api/achievements/wsauth/").then((resp) => resp.json())
     });
-    const { data: achievements, refetch: refetchAchievememts } = useGetAchievements();
-    const { refetch: refetchTeams } = useGetTeams();
+    const { data: achievements } = useGetAchievements();
 
     const dispatchEventMsg = useContext(EventContext);
 
@@ -116,13 +172,8 @@ export default function AchievementProgress({ team }: { team: AchievementTeamExt
             return;
         }
 
-        const refetch = () => {
-            refetchAchievememts();
-            refetchTeams();
-        };
-
-        connect(session.wsUri, dispatchEventMsg, data, setState, refetch);
-    }, [session.wsUri, dispatchEventMsg, data, state, refetchAchievememts, refetchTeams]);
+        connect(session.wsUri, dispatchEventMsg, data, setState, queryClient);
+    }, [session.wsUri, dispatchEventMsg, data, state, queryClient]);
 
     if (team === null || achievements === undefined) {
         return <div>Loading team progress...</div>;
