@@ -19,7 +19,7 @@ EVENT_START = 1718409600
 
 
 def serialize_full_team(team, many=False):
-    return TeamSerializer(team, many).serialize(include=["players.user", "players.completions"])
+    return TeamSerializer(team, many).serialize(include=["players.user", "players.completions.achievement_id"])
 
 
 def select_teams(many=False, **kwargs):
