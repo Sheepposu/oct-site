@@ -11,9 +11,6 @@ export default defineConfig(({ command }) => {
   if (command === "serve") {
     return {
       plugins: [react()],
-      build: {
-        minify: false,
-      },
       base: "/",
       resolve: {
         alias: {
@@ -24,9 +21,6 @@ export default defineConfig(({ command }) => {
   } else {
     return {
       plugins: [react()],
-      build: {
-        minify: false,
-      },
       base: "/static/",
       resolve: {
         alias: {
