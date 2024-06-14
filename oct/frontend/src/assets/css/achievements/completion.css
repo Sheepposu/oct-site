@@ -90,7 +90,6 @@ p {
 }
 
 .achievement-details-beatmap-info {
-    max-width: calc(100% - 300px);
     flex-grow: 1;
 
     display: flex;
