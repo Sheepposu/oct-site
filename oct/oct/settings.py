@@ -130,15 +130,26 @@ WSGI_APPLICATION = 'oct.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+PROD_DB = {
+    "ENGINE": "django.db.backends.postgresql",
+    "NAME": os.getenv("PGDATABASE"),
+    "USER": os.getenv("PGUSER"),
+    "PASSWORD": os.getenv("PGPASSWORD"),
+    "HOST": os.getenv("PGHOST"),
+    "PORT": os.getenv("PGPORT"),
+}
+
+LOCAL_DB = {
+    "ENGINE": "django.db.backends.postgresql",
+    "NAME": os.getenv("LOCAL_PGDATABASE"),
+    "USER": os.getenv("LOCAL_PGUSER"),
+    "PASSWORD": os.getenv("LOCAL_PGPASSWORD"),
+    "HOST": os.getenv("LOCAL_PGHOST"),
+    "PORT": os.getenv("LOCAL_PGPORT"),
+}
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("PGDATABASE"),
-        "USER": os.getenv("PGUSER"),
-        "PASSWORD": os.getenv("PGPASSWORD"),
-        "HOST": os.getenv("PGHOST"),
-        "PORT": os.getenv("PGPORT"),
-    }
+    "default": LOCAL_DB if DEBUG else PROD_DB
 }
 
 
