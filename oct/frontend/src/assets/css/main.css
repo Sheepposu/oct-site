@@ -215,7 +215,6 @@ hr {
 }
 
 .login-box {
-  width: 175px;
   height: 50px;
   border-radius: 50px;
 
@@ -233,7 +232,7 @@ hr {
 
 .login-text {
   width: calc(100% - 5px);
-  padding-right: 10px;
+  padding: 10px;
 
   text-align: center;
   white-space: nowrap;
