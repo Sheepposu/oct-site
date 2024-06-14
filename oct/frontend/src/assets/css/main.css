@@ -33,7 +33,7 @@ html {
 
 body {
   margin: 0;
-  margin-bottom: 50px;
+  margin-bottom: 100px;
   overflow-x: hidden;
 }
 
@@ -232,7 +232,8 @@ hr {
 
 .login-text {
   width: calc(100% - 5px);
-  padding: 10px;
+  padding-left: 10px;
+  padding-right: 15px;
 
   text-align: center;
   white-space: nowrap;
