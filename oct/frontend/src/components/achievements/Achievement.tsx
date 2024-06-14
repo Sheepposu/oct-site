@@ -34,7 +34,7 @@ export default function Achievement({achievement, team}: {achievement: Achieveme
             <div className={infoCls}>
                 <div className="achievement-info">
                     <h1>[{achievement.category}] {achievement.name}</h1>
-                    <p>Achievement description</p>
+                    <p>{achievement.description}</p>
                 </div>
                 {infoLabel}
             </div>
