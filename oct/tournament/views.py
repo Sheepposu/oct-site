@@ -25,7 +25,6 @@ from osu.path import Path
 
 
 User = get_user_model()
-OCT5 = TournamentIteration.objects.get(name="OCT5")
 USER_DISPLAY_ORDER = [
     UserRoles.HOST,
     UserRoles.REGISTERED_PLAYER,
@@ -60,7 +59,7 @@ def login_view(request):
             if user is None:
                 return JsonResponse({"status": "error", "message": "Failed to login"})
             
-            involvement = user.get_tournament_involvement(tournament_iteration=OCT5).first()
+            involvement = user.get_tournament_involvement(tournament_iteration_id="OCT5").first()
             sorted_roles = generate_roles_dict(involvement.roles.get_roles())
             
             request.session["user"] = {
@@ -748,7 +747,7 @@ def tournament_match_action(req, match_id, action):
 def referee(req):
     if not req.user.is_authenticated:
         return HttpResponseForbidden()
-    involvement = get_object_or_404(TournamentInvolvement, tournament_iteration=OCT5, user=req.user)
+    involvement = get_object_or_404(TournamentInvolvement, tournament_iteration_id="OCT5", user=req.user)
     if UserRoles.REFEREE not in involvement.roles:
         return HttpResponseForbidden()
     return render(req, "tournament/refereev1.html")
@@ -757,7 +756,7 @@ def referee(req):
 def get_osu_match_info(req):
     if not req.user.is_authenticated:
         return HttpResponseForbidden()
-    involvement = get_object_or_404(TournamentInvolvement, tournament_iteration=OCT5, user=req.user)
+    involvement = get_object_or_404(TournamentInvolvement, tournament_iteration_id="OCT5", user=req.user)
     if UserRoles.REFEREE not in involvement.roles:
         return HttpResponseForbidden()
 
@@ -773,11 +772,11 @@ def get_osu_match_info(req):
 def register(req):
     if not req.user.is_authenticated:
         return redirect("index")
-    involvement = req.user.get_tournament_involvement(tournament_iteration=OCT5)
+    involvement = req.user.get_tournament_involvement(tournament_iteration_id="OCT5")
     if not involvement:
         TournamentInvolvement.objects.create(
             user=req.user,
-            tournament_iteration=OCT5,
+            tournament_iteration_id="OCT5",
             roles=UserRoles.REGISTERED_PLAYER,
             join_date=datetime.now(timezone.utc)
         ).save()
@@ -793,7 +792,7 @@ def register(req):
 def unregister(req):
     if not req.user.is_authenticated:
         return redirect("index")
-    involvement = req.user.get_tournament_involvement(tournament_iteration=OCT5)
+    involvement = req.user.get_tournament_involvement(tournament_iteration_id="OCT5")
     if not involvement or UserRoles.REGISTERED_PLAYER not in involvement[0].roles:
         return redirect("index")
     involvement = involvement[0]
