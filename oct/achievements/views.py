@@ -15,7 +15,7 @@ from .models import *
 from .serializers import *
 
 
-EVENT_START = 1718409600
+EVENT_START = 1718416800
 
 
 def serialize_full_team(team, many=False):

@@ -9,7 +9,7 @@ import { SessionContext } from "src/contexts/SessionContext";
 import { Helmet } from "react-helmet";
 import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/AchievementTeamType";
 
-const EVENT_START = 1718409600000;
+const EVENT_START = 1718416800000;
 
 function getMyTeam(teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
   if (teams !== undefined)
