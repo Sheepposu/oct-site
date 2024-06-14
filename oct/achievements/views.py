@@ -66,6 +66,8 @@ def achievements(req):
                 achievements_achievement.id,
                 name,
                 category,
+                description,
+                beatmap_id,
                 COUNT(achievements_achievementcompletion.achievement_id)
             FROM achievements_achievement
             LEFT JOIN achievements_achievementcompletion ON (achievements_achievementcompletion.achievement_id = achievements_achievement.id)
@@ -77,7 +79,9 @@ def achievements(req):
                 "id": int(achievement[0]),
                 "name": achievement[1],
                 "category": achievement[2],
-                "completions": achievement[3]
+                "description": achievement[3],
+                "beatmap_id": achievement[4],
+                "completions": achievement[5]
             } for achievement in cursor.fetchall()]
         )
 
