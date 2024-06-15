@@ -1,7 +1,7 @@
 import { useGetAchievements, useGetTeams } from "src/api/query";
 import AchievementContainer from "src/components/achievements/AchievementContainer";
 import AchievementLeaderboard from "src/components/achievements/AchievementLeaderboard";
-import AchievementProgress from "src/components/achievements/AchievementProgress";
+import AchievementProgress, { WebsocketState } from "src/components/achievements/AchievementProgress";
 
 import "src/assets/css/achievements/completion.css";
 import { useContext, useEffect, useState } from "react";
@@ -57,7 +57,17 @@ function LimitedAchievementCompletionPage({ team }: { team: AchievementTeamExten
   );
 }
 
-function FullAchievementCompletionPage({ team }: { team: AchievementTeamExtendedType | null }) {
+function FullAchievementCompletionPage(
+  {
+    team,
+    state,
+    setState
+  }:
+  {
+    team: AchievementTeamExtendedType | null,
+    state: WebsocketState | null,
+    setState: React.Dispatch<React.SetStateAction<WebsocketState | null>>
+  }) {
   return (
     <div className="page-container">
       <Helmet>
@@ -65,7 +75,7 @@ function FullAchievementCompletionPage({ team }: { team: AchievementTeamExtended
       </Helmet>
       <AchievementContainer team={team} />
       <div className="progress-container">
-        <AchievementProgress team={team} />
+        <AchievementProgress state={state} setState={setState} team={team} />
         <AchievementLeaderboard />
       </div>
     </div>
@@ -80,6 +90,7 @@ export default function AchievementCompletionPage() {
   const team = getMyTeam(teams);
 
   const [time, setTime] = useState<number>(Date.now());
+  const [state, setState] = useState<WebsocketState | null>(null);
 
   useEffect(() => {
     if (time >= EVENT_START || session.debug) {
@@ -96,7 +107,7 @@ export default function AchievementCompletionPage() {
 
   return (
     team !== null
-      ? <FullAchievementCompletionPage team={team} />
+      ? <FullAchievementCompletionPage state={state} setState={setState} team={team} />
       : <LimitedAchievementCompletionPage team={team} />
   );
 }

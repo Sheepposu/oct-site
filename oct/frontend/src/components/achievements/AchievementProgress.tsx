@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientContext, useQuery } from "@tanstack/react-query";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { useGetAchievements } from "src/api/query";
 import { AchievementPlayerExtendedType } from "src/api/types/AchievementPlayerType";
 import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/AchievementTeamType";
@@ -7,7 +7,7 @@ import { AchievementExtendedType } from "src/api/types/AchievementType";
 import { EventContext, EventStateType } from "src/contexts/EventContext";
 import { SessionContext } from "src/contexts/SessionContext";
 
-type WebsocketState = {
+export type WebsocketState = {
     ws: WebSocket;
     dispatchEventMsg: React.Dispatch<{type: EventStateType, msg: string}>;
     onMutation: React.Dispatch<React.SetStateAction<WebsocketState | null>>;
@@ -151,11 +151,17 @@ function onMessage(evt: MessageEvent<string>, state: WebsocketState) {
     }
 }
 
-export default function AchievementProgress({ team }: { team: AchievementTeamExtendedType | null }) {
+export default function AchievementProgress({
+    team,
+    state,
+    setState
+}: {
+    team: AchievementTeamExtendedType | null,
+    state: WebsocketState | null,
+    setState: React.Dispatch<React.SetStateAction<WebsocketState | null>>
+}) {
     const session = useContext(SessionContext);
     const queryClient = useContext(QueryClientContext) as QueryClient;
-
-    const [state, setState] = useState<WebsocketState | null>(null);
 
     const { data } = useQuery({
         queryKey: ["wsauth"],
@@ -175,7 +181,7 @@ export default function AchievementProgress({ team }: { team: AchievementTeamExt
         }
 
         connect(session.wsUri, dispatchEventMsg, data, setState, queryClient);
-    }, [session.wsUri, dispatchEventMsg, data, state, queryClient, state?.ws.readyState]);
+    }, [session.wsUri, dispatchEventMsg, data, state, queryClient, state?.ws.readyState, setState]);
 
     if (team === null || achievements === undefined) {
         return <div>Loading team progress...</div>;
