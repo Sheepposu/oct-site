@@ -32,7 +32,7 @@ function connect(uri: string, dispatchEventMsg: React.Dispatch<{type: EventState
     });
     ws.addEventListener("close", (evt) => {
         console.log(evt);
-        dispatchEventMsg({type: "error", msg: "Connection to submissions server unexpectedly closed... try refreshing"});
+        dispatchEventMsg({type: "error", msg: "Connection to submissions server unexpectedly closed; reconnecting..."});
         state.authenticated = false;
         onMutation({...state});
     });
@@ -170,7 +170,7 @@ export default function AchievementProgress({ team }: { team: AchievementTeamExt
             return;
         }
 
-        if (state !== null) {
+        if (state !== null && state.ws.readyState != 2 && state.ws.readyState != 3) {
             return;
         }
 
