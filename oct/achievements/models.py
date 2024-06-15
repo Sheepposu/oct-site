@@ -22,7 +22,7 @@ class BeatmapInfo(RelationCachingModel):
 
 
 class Achievement(RelationCachingModel):
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=64)
     category = models.CharField(max_length=32)
     description = models.CharField(max_length=256)
     beatmap = models.ForeignKey(
