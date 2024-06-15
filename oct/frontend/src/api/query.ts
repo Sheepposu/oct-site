@@ -90,6 +90,7 @@ export function useGetAchievements(
   return useMakeQuery({
     queryKey: ["achievements"],
     enabled,
+    refetchInterval: 60000
   });
 }
 
@@ -108,6 +109,7 @@ export function useGetTeams(
   return useMakeQuery({
     queryKey: ["achievements", "teams"],
     enabled,
+    refetchInterval: 60000
   });
 }
 
