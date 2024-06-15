@@ -175,7 +175,7 @@ export default function AchievementProgress({ team }: { team: AchievementTeamExt
         }
 
         connect(session.wsUri, dispatchEventMsg, data, setState, queryClient);
-    }, [session.wsUri, dispatchEventMsg, data, state, queryClient]);
+    }, [session.wsUri, dispatchEventMsg, data, state, queryClient, state?.ws.readyState]);
 
     if (team === null || achievements === undefined) {
         return <div>Loading team progress...</div>;
