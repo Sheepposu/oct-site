@@ -11,7 +11,7 @@ export default function AchievementLeaderboard() {
       {isPending ? (
         <div>Loading...</div>
       ) : isSuccess ? (
-        data?.map((team, index) => (
+        data?.sort((a, b) => b.points - a.points).map((team, index) => (
           <TeamCard key={index} team={team} placement={index + 1} />
         ))
       ) : (

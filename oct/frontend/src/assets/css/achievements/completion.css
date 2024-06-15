@@ -265,7 +265,7 @@ p {
   text-align: center;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1250px) {
   .page-container {
     flex-direction: column;
   }
