@@ -186,7 +186,7 @@ def create_team(req):
     
     team = TeamSerializer(team).serialize()
     player = PlayerSerializer(player).serialize(include=["user"])
-    player["completions"] = 0
+    player["completions"] = []
     team["players"] = [player]
     return success(team)
 
