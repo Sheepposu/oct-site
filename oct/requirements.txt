@@ -9,6 +9,5 @@ requests==2.28.0
 pymongo==4.3.3
 osu.py==2.0.1
 djangorestframework==3.14.0
-sentry-sdk==2.5.1
 django-debug-toolbar==4.2.0
 PyNaCl==1.5.0
