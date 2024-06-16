@@ -16,7 +16,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from rest_framework.renderers import JSONRenderer
 
 from .serializers import *
-from common import render, get_auth_handler, log_err, parse_sql_row
+from common import render, parse_sql_row
 
 import requests
 import json

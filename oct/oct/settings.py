@@ -91,6 +91,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "common.error_report.ExceptionLoggingMiddleware"
     # 'corsheaders.middleware.CorsMiddleware'
 ]
 
