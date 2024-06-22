@@ -12,11 +12,19 @@ import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/
 const EVENT_START = 1718416800000;
 export const EVENT_END = 1719187200000;
 
-function getMyTeam(teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
+function getMyTeam(userId: string | undefined, teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
+  if (userId === undefined) {
+    return null;
+  }
+  
   if (teams !== undefined)
     for (const team of teams) {
-      if ("invite" in team) {
-        return team as AchievementTeamExtendedType;
+      if ("players" in team) {
+        for (const player of team.players) {
+          if (player.user.id === userId) {
+            return team as AchievementTeamExtendedType;
+          }
+        }
       }
   }
 
@@ -92,7 +100,7 @@ export default function AchievementCompletionPage() {
 
   useGetAchievements(false);
   const { data: teams } = useGetTeams();
-  const team = getMyTeam(teams);
+  const team = getMyTeam(session.user?.id, teams);
 
   const [time, setTime] = useState<number>(Date.now());
   const [state, setState] = useState<WebsocketState | null>(null);
