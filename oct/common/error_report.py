@@ -2,6 +2,8 @@ import os
 import threading
 import requests
 
+from django.conf import settings
+
 
 __all__ = (
     "ExceptionLoggingMiddleware",
@@ -42,4 +44,5 @@ class ExceptionLoggingMiddleware:
         return self.get_response(*args, **kwargs)
     
     def process_exception(self, req, exc) -> None:
-        log_err(req, exc)
+        if not settings.DEBUG:
+            log_err(req, exc)
