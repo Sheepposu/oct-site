@@ -111,6 +111,27 @@ p {
   font-size: 40px;
 }
 
+.achievement-players-container {
+  width: 100%;
+  padding: 5px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.achievement-players-entry {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.achievement-players-entry-pfp {
+  height: 50px;
+  border-radius: 100%;
+}
+
 .progress-container {
   min-width: 400px;
 

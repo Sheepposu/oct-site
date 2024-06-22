@@ -10,6 +10,7 @@ import { Helmet } from "react-helmet";
 import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/AchievementTeamType";
 
 const EVENT_START = 1718416800000;
+export const EVENT_END = 1719187200000;
 
 function getMyTeam(teams?: Array<AchievementTeamExtendedType | AchievementTeamType>): AchievementTeamExtendedType | null {
   if (teams !== undefined)
@@ -22,9 +23,7 @@ function getMyTeam(teams?: Array<AchievementTeamExtendedType | AchievementTeamTy
   return null;
 }
 
-function HiddenAchievementCompletionPage({ time }: { time: number }) {
-  const delta = EVENT_START - time;
-
+function getTimeStr(delta: number) {
   const days = Math.floor((delta / (1000 * 60 * 60 * 24)) % 60);
   const hours = Math.floor((delta / (1000 * 60 * 60)) % 24);
   const minutes = Math.floor((delta / (1000 * 60)) % 60);
@@ -32,24 +31,30 @@ function HiddenAchievementCompletionPage({ time }: { time: number }) {
   const timeString = [days, hours, minutes, seconds]
     .map((n) => (n < 10 ? "0" + n : "" + n))
     .join(":");
+  return timeString;
+}
+
+function HiddenAchievementCompletionPage({ time }: { time: number }) {
+  const delta = EVENT_START - time;
+  const timeString = getTimeStr(delta);
 
   return (
-    <div style={{ margin: "auto", textAlign: "center", marginTop: "50px" }}>
+    <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
       <Helmet>
         <title>{timeString}</title>
       </Helmet>
-      <h1 style={{ fontSize: "100px" }}>Starts in {timeString}</h1>
+      <h1 style={{ fontSize: "1em" }}>Starts in {timeString}</h1>
     </div>
   );
 }
 
-function LimitedAchievementCompletionPage({ team }: { team: AchievementTeamExtendedType | null }) {
+function LimitedAchievementCompletionPage() {
   return (
     <div className="page-container">
       <Helmet>
         <title>OCAH Achievements</title>
       </Helmet>
-      <AchievementContainer team={team} />
+      <AchievementContainer />
       <div className="progress-container">
         <AchievementLeaderboard />
       </div>
@@ -73,7 +78,7 @@ function FullAchievementCompletionPage(
       <Helmet>
         <title>OCAH Achievements</title>
       </Helmet>
-      <AchievementContainer team={team} />
+      <AchievementContainer />
       <div className="progress-container">
         <AchievementProgress state={state} setState={setState} team={team} />
         <AchievementLeaderboard />
@@ -93,10 +98,6 @@ export default function AchievementCompletionPage() {
   const [state, setState] = useState<WebsocketState | null>(null);
 
   useEffect(() => {
-    if (time >= EVENT_START || session.debug) {
-      return;
-    }
-
     const intervalId = setInterval(() => setTime(Date.now()), 1000);
     return () => clearInterval(intervalId);
   });
@@ -106,8 +107,15 @@ export default function AchievementCompletionPage() {
   }
 
   return (
-    team !== null
-      ? <FullAchievementCompletionPage state={state} setState={setState} team={team} />
-      : <LimitedAchievementCompletionPage team={team} />
+    <>
+    <div style={{ margin: "auto", textAlign: "center", marginTop: "20px" }}>
+      <h1 style={{ fontSize: "3em" }}>{ time < EVENT_END ? `Ends in: ${getTimeStr(EVENT_END - time)}` : "Event ended" }</h1>
+    </div>
+    {
+      team !== null
+        ? <FullAchievementCompletionPage state={state} setState={setState} team={team} />
+        : <LimitedAchievementCompletionPage />
+    }
+    </>
   );
 }

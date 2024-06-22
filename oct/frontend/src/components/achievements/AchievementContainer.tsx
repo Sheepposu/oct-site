@@ -1,14 +1,9 @@
-import { AchievementTeamExtendedType } from "src/api/types/AchievementTeamType";
 import Achievement from "./Achievement";
 import { useGetAchievements } from "src/api/query";
 import { AchievementExtendedType } from "src/api/types/AchievementType";
 import "src/assets/css/achievements/completion.css";
 
-export default function AchievementContainer({
-  team,
-}: {
-  team: AchievementTeamExtendedType | null;
-}) {
+export default function AchievementContainer() {
   const { data: achievements } = useGetAchievements();
 
   const sortedAchievements: { [key: string]: AchievementExtendedType[] } = {};
@@ -24,11 +19,11 @@ export default function AchievementContainer({
   return (
     <div className="achievements-container">
       {achievements !== undefined ? (
-        Object.keys(sortedAchievements).map((key) => (
+        Object.keys(sortedAchievements).sort((a, b) => a.localeCompare(b)).map((key) => (
           <>
             <div className="achievement-category">{key}</div>
             {sortedAchievements[key].map((achievement, index) => (
-              <Achievement key={index} achievement={achievement} team={team} />
+              <Achievement key={index} achievement={achievement} />
             ))}
           </>
         ))

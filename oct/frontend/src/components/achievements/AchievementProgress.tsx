@@ -6,6 +6,7 @@ import { AchievementTeamExtendedType, AchievementTeamType } from "src/api/types/
 import { AchievementExtendedType } from "src/api/types/AchievementType";
 import { EventContext, EventStateType } from "src/contexts/EventContext";
 import { SessionContext } from "src/contexts/SessionContext";
+import { EVENT_END } from "src/routes/achievements/completion";
 
 export type WebsocketState = {
     ws: WebSocket;
@@ -162,6 +163,7 @@ export default function AchievementProgress({
 }) {
     const session = useContext(SessionContext);
     const queryClient = useContext(QueryClientContext) as QueryClient;
+    const dispatchEventMsg = useContext(EventContext);
 
     const { data } = useQuery({
         queryKey: ["wsauth"],
@@ -169,10 +171,10 @@ export default function AchievementProgress({
     });
     const { data: achievements } = useGetAchievements();
 
-    const dispatchEventMsg = useContext(EventContext);
+    const eventEnded: boolean = Date.now() >= EVENT_END;
 
     useEffect(() => {
-        if (data === undefined || data === null) {
+        if (data === undefined || data === null || eventEnded) {
             return;
         }
 
@@ -181,7 +183,7 @@ export default function AchievementProgress({
         }
 
         connect(session.wsUri, dispatchEventMsg, data, setState, queryClient);
-    }, [session.wsUri, dispatchEventMsg, data, state, queryClient, state?.ws.readyState, setState]);
+    }, [session.wsUri, dispatchEventMsg, data, state, queryClient, state?.ws.readyState, setState, eventEnded]);
 
     if (team === null || achievements === undefined) {
         return <div>Loading team progress...</div>;
@@ -192,7 +194,7 @@ export default function AchievementProgress({
         achievementCount += player.completions.length;
     }
     
-    const submitCls = "submit-button" + (state === null || !state.authenticated ? " disabled" : "");
+    const submitCls = "submit-button" + (state === null || !state.authenticated || eventEnded ? " disabled" : "");
 
     return (
         <div className="total-achievements-container">

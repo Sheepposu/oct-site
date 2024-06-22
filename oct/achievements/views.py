@@ -16,6 +16,11 @@ from .serializers import *
 
 
 EVENT_START = 1718416800
+EVENT_END = 1719187200
+
+
+def event_ended():
+    return time.time() >= EVENT_END - 1 or settings.DEBUG
 
 
 def serialize_full_team(team, many=False):
@@ -111,18 +116,24 @@ def team(req):
     return success(team)
 
 def teams(req):
-    serialized_teams = [
-        serialize_full_team(team)
-        if any(map(lambda p: p.user.id == req.user.id, team.players)) else
-        TeamSerializer(team).serialize(exclude=["invite"])
-        for team in select_teams(many=True)
-    ]
+    if event_ended() or (req.user.is_authenticated and req.user.is_admin):
+        serialized_teams = map(serialize_full_team, select_teams(many=True))
+    else:
+        serialized_teams = (
+            serialize_full_team(team)
+            if any(map(lambda p: p.user.id == req.user.id, team.players)) else
+            TeamSerializer(team).serialize(exclude=["invite"])
+            for team in select_teams(many=True)
+        )
     sorted_teams = sorted(serialized_teams, key=lambda t: t['points'], reverse=True)
 
     return success(sorted_teams)
     
 @require_POST
 def join_team(req):
+    if event_ended():
+        return error("event ended")
+
     data = parse_body(req.body, ("invite",))
     if data is None or data["invite"] is None:
         return error("invalid invite")
@@ -146,6 +157,9 @@ def join_team(req):
 
 @require_http_methods(["DELETE"])
 def leave_team(req):
+    if event_ended():
+        return error("event ended")
+
     # TODO: maybe make this into a postgresql function
     team = None
     if req.user.is_authenticated:
@@ -166,6 +180,9 @@ def leave_team(req):
 
 @require_POST
 def create_team(req):
+    if event_ended():
+        return error("event ended")
+
     data = parse_body(req.body, ("name",))
     if data is None or (name := data["name"]) is None or len(name) == 0 or len(name) > 32:
         return error("invalid name")

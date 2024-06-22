@@ -23,7 +23,7 @@ class MappoolBeatmapSerializer:
 @serializer
 class UserSerializer:
     model = User
-    fields = ['osu_id', 'osu_username', 'osu_avatar', 'osu_cover', 'is_admin']
+    fields = ['id', 'osu_id', 'osu_username', 'osu_avatar', 'osu_cover', 'is_admin']
 
 
 @serializer
