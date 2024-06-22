@@ -122,12 +122,12 @@ export default function Achievement({
           </div>
         </a>
       )}
+      { achievement.beatmap === null || players.length === 0 ? "" : <hr/> }
       { 
-        players.length == 0 ? "" : <>
-        <hr/>
+        players.length == 0 ? "" :
         <div className="achievement-players-container">
           {
-            players.map(
+            players.sort((a, b) => Date.parse(a[1].time_completed) - Date.parse(b[1].time_completed)).map(
               ([player, completion]) => 
               <div className="achievement-players-entry">
                 <img className="achievement-players-entry-pfp" src={player.user.osu_avatar}></img>
@@ -138,7 +138,7 @@ export default function Achievement({
               </div>
             )
           }
-        </div></>
+        </div>
       }
     </div>
   );
