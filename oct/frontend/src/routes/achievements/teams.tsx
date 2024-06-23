@@ -29,9 +29,13 @@ export default function TeamsCard() {
   let ownPlacement: number | null = null;
   if (Array.isArray(teams))
     for (const [i, team] of teams.entries()) {
-      if ("invite" in team) {
-        ownTeam = team as AchievementTeamExtendedType;
-        ownPlacement = i + 1;
+      if ("players" in team) {
+        for (const player of team.players) {
+          if (player.user.id === session.user?.id) {
+            ownTeam = team as AchievementTeamExtendedType;
+            ownPlacement = i + 1;
+          }
+        }
       }
     }
 
