@@ -1,10 +1,12 @@
 import os
-import requests
 import threading
+import requests
+
+from django.conf import settings
 
 
 __all__ = (
-    "log_err",
+    "ExceptionLoggingMiddleware",
 )
 
 
@@ -32,3 +34,15 @@ def log_err(req, e):
             embeds.append(header_embed())
         embeds[-1]["fields"].append({"name": name, "value": value})
     threading.Thread(target=requests.post, args=(WEBHOOK_URL,), kwargs={"json": {"embeds": embeds}}).start()
+
+
+class ExceptionLoggingMiddleware:
+    def __init__(self, get_response) -> None:
+        self.get_response = get_response
+
+    def __call__(self, *args, **kwargs):
+        return self.get_response(*args, **kwargs)
+    
+    def process_exception(self, req, exc) -> None:
+        if not settings.DEBUG:
+            log_err(req, exc)

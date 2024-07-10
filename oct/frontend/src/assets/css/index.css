@@ -1,0 +1,37 @@
+#fade-in-element {
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+}
+
+.homepage-video {
+    width: 100%;
+}
+
+#video-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 30px;
+    left: auto;
+    width: 660px;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-overlay img {
+    width: 660px;
+}
+
+.banner-title {
+    width: 60%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}

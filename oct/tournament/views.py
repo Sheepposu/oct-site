@@ -10,17 +10,21 @@ from django.http import (
 )
 from django.core.cache import cache
 from django.db import connection
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST
+from django.contrib.sessions.backends.db import SessionStore
+from rest_framework.renderers import JSONRenderer
 
 from .serializers import *
-from common import render, get_auth_handler, log_err, parse_sql_row
+from common import render, parse_sql_row
 
 import requests
-import traceback
+import json
+import time
 from osu.path import Path
 
 
 User = get_user_model()
-OCT5 = TournamentIteration.objects.get(name="OCT5")
 USER_DISPLAY_ORDER = [
     UserRoles.HOST,
     UserRoles.REGISTERED_PLAYER,
@@ -35,6 +39,66 @@ USER_DISPLAY_ORDER = [
 
 def error_500(request):
     return render(request, "tournament/error_500.html")
+
+
+def generate_roles_dict(roles):
+    role_list = list(map(lambda r: (r.name[0]+r.name[1:]).lower(), roles))
+    return dict(map(lambda role: (role, role in role_list), ["host", "registered_player", "custom_mapper", "mappooler", "playtester", "streamer", "commentator", "referee"]))
+
+
+# Login endpoints
+
+@require_POST
+def login_view(request):
+    data = json.loads(request.body)
+
+    try:
+        code = data.get('code')
+        if code is not None:
+            user = User.objects.create_user(code)
+            if user is None:
+                return JsonResponse({"status": "error", "message": "Failed to login"})
+            
+            involvement = user.get_tournament_involvement(tournament_iteration_id="OCT5").first()
+            sorted_roles = generate_roles_dict(involvement.roles.get_roles())
+            
+            request.session["user"] = {
+                "osu_id": user.osu_id,
+                "osu_username": user.osu_username,
+                "osu_avatar": user.osu_avatar,
+                "osu_cover": user.osu_cover,
+                "roles": sorted_roles,
+            }
+
+            _login(request, user, backend=settings.AUTH_BACKEND)
+            return JsonResponse({"status": "success"})
+        
+    except requests.HTTPError as exc:
+        print(exc.response.text)
+        return HttpResponseBadRequest()
+    except Exception as exc:
+        print(exc)
+    return HttpResponseServerError()
+
+
+def logout_view(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'detail': 'You\'re not logged in.'}, status=400)
+
+    _logout(request)
+    request.session["user"] = None
+    return JsonResponse({'detail': 'Successfully logged out.'})
+
+
+@ensure_csrf_cookie
+def session_view(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'isAuthenticated': False})
+    
+    user_serializer = UserSerializer(request.user)
+    serialized_user = user_serializer.serialize(include=["involvements", "roles"])
+
+    return JsonResponse({'isAuthenticated': True, 'user': serialized_user}, safe=False)
 
 
 # TODO: maybe move caching logic to models
@@ -59,6 +123,7 @@ def get_mappools(tournament: TournamentIteration):
         cache.set(f"{tournament.name}_mappools", mps, None)
     return mps
 
+
 def get_rounds(tournament: TournamentIteration, names=False):
     brackets = tournament.get_brackets()
     if not brackets:
@@ -73,6 +138,7 @@ def get_rounds(tournament: TournamentIteration, names=False):
         } for round in rounds]
 
     return rounds
+
 
 def get_teams(tournament: TournamentIteration):
     teams = cache.get(f"{tournament.name}_teams")
@@ -163,67 +229,175 @@ def login(req):
         state = req.GET.get("state", None)
         return redirect(state or "index")
     except requests.HTTPError as exc:
-        log_err(req, exc)
         return HttpResponseBadRequest()
-    except Exception as exc:
-        log_err(req, exc)
-    return HttpResponseServerError()
 
 
 def logout(req):
     if req.user.is_authenticated:
         _logout(req)
-    return redirect("index")
+        return JsonResponse({}, safe=False)
+    return JsonResponse({"error": "not logged in"}, status=403, safe=False)
 
 
 def dashboard(req):
     if not req.user.is_authenticated:
-        return redirect("index")
-    involvement = req.user.get_tournament_involvement(tournament_iteration=OCT5).first()
-    roles = sorted(involvement.roles.get_roles(), key=lambda r: USER_DISPLAY_ORDER.index(r)) \
-        if involvement is not None else None
-    formatted_roles = ", ".join(map(lambda r: r.name[0]+r.name[1:].replace("_", " ").lower(), roles)) \
-        if roles else "No Roles"
+        return HttpResponse(status=401)
 
-    context = {
-        "is_registered": involvement is not None and UserRoles.REGISTERED_PLAYER in involvement.roles,
-        "roles": formatted_roles
-    }
-    player = StaticPlayer.objects.select_related("team").filter(
-        user=req.user,
-        team__bracket__tournament_iteration=OCT5
-    ).first()
-    
+    with connection.cursor() as cursor:
+        cursor.execute(
+            f"""
+            SELECT (
+                tournament_tournamentmatch.id,
+                tournament_tournamentmatch.match_id,
+                tournament_tournamentmatch.team_order,
+                tournament_tournamentmatch.starting_time,
+                tournament_tournamentmatch.is_losers,
+                tournament_tournamentmatch.osu_match_id,
+                tournament_tournamentmatch.bans,
+                tournament_tournamentmatch.picks,
+                tournament_tournamentmatch.wins,
+                tournament_tournamentmatch.finished,
+                tournament_tournamentmatch.referee_id,
+                referee.osu_id,
+                referee.osu_username,
+                referee.osu_avatar,
+                referee.osu_cover,
+                referee.is_admin,
+                tournament_tournamentmatch.streamer_id,
+                streamer.osu_id,
+                streamer.osu_username,
+                streamer.osu_avatar,
+                streamer.osu_cover,
+                streamer.is_admin,
+                tournament_tournamentmatch.commentator1_id,
+                commentator1.osu_id,
+                commentator1.osu_username,
+                commentator1.osu_avatar,
+                commentator1.osu_cover,
+                commentator1.is_admin,
+                tournament_tournamentmatch.commentator2_id,
+                commentator2.osu_id,
+                commentator2.osu_username,
+                commentator2.osu_avatar,
+                commentator2.osu_cover,
+                commentator2.is_admin,
+                tournament_tournamentmatch.tournament_round_id,
+                tournament_tournamentround.name,
+                tournament_tournamentround.full_name,
+                tournament_tournamentround.start_date,
+                tournament_tournamentround.mappack,
+                tournament_tournamentmatch_teams.tournamentteam_id,
+                tournament_tournamentteam.name,
+                tournament_tournamentteam.icon,
+                tournament_tournamentteam.seed,
+                tournament_staticplayer.id,
+                tournament_staticplayer.osu_rank,
+                tournament_staticplayer.is_captain,
+                tournament_staticplayer.tier,
+                tournament_staticplayer.user_id,
+                player_user.osu_id,
+                player_user.osu_username,
+                player_user.osu_avatar,
+                player_user.osu_cover,
+                player_user.is_admin
+            ) FROM tournament_tournamentmatch
+            INNER JOIN tournament_tournamentround ON (tournament_tournamentround.id = tournament_tournamentmatch.tournament_round_id)
+            INNER JOIN tournament_tournamentmatch_teams ON (tournament_tournamentmatch_teams.tournamentmatch_id = tournament_tournamentmatch.id)
+            INNER JOIN tournament_tournamentteam ON (tournament_tournamentmatch_teams.tournamentteam_id = tournament_tournamentteam.id)
+            INNER JOIN tournament_staticplayer ON (tournament_staticplayer.team_id = tournament_tournamentteam.id)
+            INNER JOIN tournament_user AS player_user ON (tournament_staticplayer.user_id = player_user.id)
+            LEFT JOIN tournament_user AS referee ON (referee.id = tournament_tournamentmatch.referee_id)
+            LEFT JOIN tournament_user AS streamer ON (streamer.id = tournament_tournamentmatch.streamer_id)
+            LEFT JOIN tournament_user AS commentator1 ON (commentator1.id = tournament_tournamentmatch.commentator1_id)
+            LEFT JOIN tournament_user AS commentator2 ON (commentator2.id = tournament_tournamentmatch.commentator2_id)
+            WHERE tournament_tournamentmatch.referee_id = '{req.user.id}' OR tournament_staticplayer.user_id = '{req.user.id}'
+            """
+        )
+
+        def parse_user(row):
+            return {
+                "id": row[0],
+                "osu_id": int(row[1]),
+                "osu_username": row[2],
+                "osu_avatar": row[3],
+                "osu_cover": row[4],
+                "is_admin": row[5] == "f"
+            } if row[0] is not None else None
+
+        partial_matches = [
+            {
+                "id": int(row[0]),
+                "match_id": int(row[1]),
+                "team_order": row[2],
+                "starting_time": row[3],
+                "is_losers": row[4] == "f",
+                "osu_match_id": int(row[5]),
+                "bans": row[6],
+                "picks": row[7],
+                "wins": row[8],
+                "finished": row[9] == "t",
+                "referee": parse_user(row[10:16]),
+                "streamer": parse_user(row[16:22]),
+                "commentator1": parse_user(row[22:28]),
+                "commentator2": parse_user(row[28:34]),
+                "tournament_round": {
+                    "id": int(row[34]),
+                    "name": row[35],
+                    "full_name": row[36],
+                    "start_date": row[37],
+                    "mappack": row[38],
+                },
+                "teams": [{
+                    "id": int(row[39]),
+                    "name": row[40],
+                    "icon": row[41],
+                    "seed": None if row[42] is None else int(row[42]),
+                    "players": [{
+                        "id": int(row[43]),
+                        "osu_rank": int(row[44]),
+                        "is_captain": row[45],
+                        "tier": row[46],
+                        "user": parse_user(row[47:53]),
+                    }]
+                }]
+            }
+            for row in cursor.fetchall()
+        ]
+
+    def combine(wholes, partial, hierarchy):
+        try:
+            whole = next(filter(lambda whole: whole["id"] == partial["id"], wholes))
+            if len(hierarchy) > 0:
+                attr = hierarchy[0]
+                combine(whole[attr], partial[attr][0], hierarchy[1:])
+        except StopIteration:
+            wholes.append(partial)
+
     matches = []
-    if player is not None:
-        matches += list(map(
-            lambda m: map_match_object(m, player),
-            player.team.tournamentmatch_set.prefetch_related("teams").select_related("tournament_round__bracket").all()
-        ))
-    if involvement is not None and UserRoles.REFEREE in involvement.roles:
-        matches += list(filter(lambda m: m not in matches, map(
-            map_match_object, 
-            TournamentMatch.objects.filter(referee=req.user, tournament_round__bracket__tournament_iteration=OCT5)
-        )))
-    context["matches"] = sorted(matches, key=lambda info: info["obj"])
+    for partial in partial_matches:
+        combine(matches, partial, ["teams", "players"])
 
-    return render(req, "tournament/dashboard.html", context)
+    return JsonResponse(matches, safe=False)
+
+    # matches = TournamentMatch.select_with(("referee", "streamer", "commentator1", "commentator2", "tournament_round", "teams", "teams.players", "teams.players.user"))
+    # serializer = TournamentMatchSerializer(matches, many=True)
+    # return JsonResponse(serializer.serialize(), safe=False)
 
 
 def tournaments(req, name=None, section=None):
     if name is None or name == "":
-        return render(req, "tournament/tournaments.html", {
-            "tournaments": TournamentIteration.objects.all()
-        })
+        serializer = TournamentIterationSerializer(TournamentIteration.objects.all(), many=True)
+        return JsonResponse(serializer.serialize(exclude=["users"]), safe=False)
     name = name.upper()
     tournament = get_object_or_404(TournamentIteration, name=name)
+    tournament_serializer = TournamentIterationSerializer(tournament)
     if section is None:
-        return render(req, "tournament/tournament_info.html", {
-            "tournament": tournament,
+        return JsonResponse({
+            "tournament": tournament_serializer.serialize(exclude=["users"]),
             "rounds": [{
                 "name": rnd.full_name,
                 "date": rnd.str_date
-            } for rnd in sorted(tournament.get_brackets()[0].get_rounds(), key=lambda rnd: rnd.start_date)]  # TODO: possible multiple brackets
+            } for rnd in sorted(tournament.get_brackets()[0].get_rounds(), key=lambda rnd: rnd.start_date)]
         })
     try:
         return {
@@ -317,6 +491,7 @@ def map_match_object(match, player=None):
     match_info = {"obj": match}
     progress = match.get_progress()
     match_info["progress"] = progress
+    match_info["time_str"] = match.time_str
     if match.tournament_round.name != "QUALIFIERS":
         teams = match.teams.all()
         if match.team_order and teams:
@@ -346,6 +521,18 @@ def map_match_object(match, player=None):
         "DEFEAT": "#FF8A8A",
         "QUALIFIERS": "#AAAAAA" if progress == "UPCOMING" else "#8A8AFF",
     }[match_info["result"]]
+
+    for key, value in match_info.items():
+        if isinstance(value, TournamentMatch):
+            serializer = TournamentMatchSerializer(value)
+            match_info[key] = serializer.serialize(exclude=["tournament_round"])
+            continue
+
+        if isinstance(value, TournamentTeam):
+            serializer = TournamentTeamSerializer(value)
+            match_info[key] = serializer.serialize()
+            continue
+            
     return match_info
 
 
@@ -560,7 +747,7 @@ def tournament_match_action(req, match_id, action):
 def referee(req):
     if not req.user.is_authenticated:
         return HttpResponseForbidden()
-    involvement = get_object_or_404(TournamentInvolvement, tournament_iteration=OCT5, user=req.user)
+    involvement = get_object_or_404(TournamentInvolvement, tournament_iteration_id="OCT5", user=req.user)
     if UserRoles.REFEREE not in involvement.roles:
         return HttpResponseForbidden()
     return render(req, "tournament/refereev1.html")
@@ -569,7 +756,7 @@ def referee(req):
 def get_osu_match_info(req):
     if not req.user.is_authenticated:
         return HttpResponseForbidden()
-    involvement = get_object_or_404(TournamentInvolvement, tournament_iteration=OCT5, user=req.user)
+    involvement = get_object_or_404(TournamentInvolvement, tournament_iteration_id="OCT5", user=req.user)
     if UserRoles.REFEREE not in involvement.roles:
         return HttpResponseForbidden()
 
@@ -585,11 +772,11 @@ def get_osu_match_info(req):
 def register(req):
     if not req.user.is_authenticated:
         return redirect("index")
-    involvement = req.user.get_tournament_involvement(tournament_iteration=OCT5)
+    involvement = req.user.get_tournament_involvement(tournament_iteration_id="OCT5")
     if not involvement:
         TournamentInvolvement.objects.create(
             user=req.user,
-            tournament_iteration=OCT5,
+            tournament_iteration_id="OCT5",
             roles=UserRoles.REGISTERED_PLAYER,
             join_date=datetime.now(timezone.utc)
         ).save()
@@ -605,10 +792,13 @@ def register(req):
 def unregister(req):
     if not req.user.is_authenticated:
         return redirect("index")
-    involvement = req.user.get_tournament_involvement(tournament_iteration=OCT5)
+    involvement = req.user.get_tournament_involvement(tournament_iteration_id="OCT5")
     if not involvement or UserRoles.REGISTERED_PLAYER not in involvement[0].roles:
         return redirect("index")
     involvement = involvement[0]
     involvement.roles = UserRoles(involvement.roles - UserRoles.REGISTERED_PLAYER)
     involvement.save()
     return redirect("dashboard")
+
+
+

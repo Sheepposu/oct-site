@@ -11,16 +11,13 @@ from tournament.models import *
 from datetime import datetime, timezone
 
 
-oct5 = TournamentIteration.objects.get(name="OCT5")
-
-
 def add_roles(users, role):
     for u in users:
         print(u)
         user = User.objects.get(**{("osu_username" if type(u) == str else "osu_id"): u})
         i, created = TournamentInvolvement.objects.get_or_create(
             user=user, 
-            tournament_iteration=oct5, 
+            tournament_iteration_id="OCT5", 
             defaults={
                 "roles": role,
                 "join_date": datetime.now(tz=timezone.utc)

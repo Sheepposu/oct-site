@@ -23,7 +23,7 @@ def enum_field(enum, field):
             cls.__name__,
             (cls, field,),
             {
-                "from_db_value": lambda self, value, expression, connection: enum(value),
+                "from_db_value": lambda self, value, expression, connection: enum(value) if value is not None else None,
                 "to_python": lambda self, value: value if isinstance(value, enum) else enum(value),
                 "get_prep_value": lambda self, value: value.value if isinstance(value, enum) else value
             }

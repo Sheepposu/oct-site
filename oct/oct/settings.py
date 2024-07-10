@@ -16,24 +16,8 @@ load_dotenv()
 import os
 from osu import AuthHandler, Scope, Client
 import mimetypes
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
 
 mimetypes.add_type("text/css", ".css", True)
-
-sentry_sdk.init(
-  dsn=os.getenv("SENTRY_DSN"),
-  integrations=[DjangoIntegration()],
-
-  # Set traces_sample_rate to 1.0 to capture 100%
-  # of transactions for performance monitoring.
-  # We recommend adjusting this value in production.
-  traces_sample_rate=1.0,
-
-  # If you wish to associate users to errors (assuming you are using
-  # django.contrib.auth) you may enable sending PII data.
-  send_default_pii=True
-)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,17 +28,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+WS_CONNECTION_VALIDATOR = os.getenv("WS_CONNECTION_VALIDATOR")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(int(os.getenv("DJANGO_DEBUG")))
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "oct.sheppsu.me",
-    "parched-flowers-production.up.railway.app"
-]
 
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = [
+        "ocah.sheppsu.me"
+    ]
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Application definition
 
@@ -66,7 +56,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     "debug_toolbar",
-    "tournament.apps.TournamentConfig"
+    "tournament.apps.TournamentConfig",
+    "achievements.apps.AchievementsConfig"
 ]
 
 REST_FRAMEWORK = {
@@ -76,19 +67,15 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "common.error_report.ExceptionLoggingMiddleware"
 ]
-
-WHITENOISE_MIMETYPES = {
-    '.css': "text/css",
-}
 
 ROOT_URLCONF = 'oct.urls'
 
@@ -96,7 +83,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, "templates")
+            os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "frontend")
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -116,14 +104,32 @@ WSGI_APPLICATION = 'oct.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+PROD_DB = {
+    "ENGINE": "django.db.backends.postgresql",
+    "NAME": os.getenv("PGDATABASE"),
+    "USER": os.getenv("PGUSER"),
+    "PASSWORD": os.getenv("PGPASSWORD"),
+    "HOST": os.getenv("PGHOST"),
+    "PORT": os.getenv("PGPORT"),
+}
+
+LOCAL_DB = {
+    "ENGINE": "django.db.backends.postgresql",
+    "NAME": os.getenv("LOCAL_PGDATABASE"),
+    "USER": os.getenv("LOCAL_PGUSER"),
+    "PASSWORD": os.getenv("LOCAL_PGPASSWORD"),
+    "HOST": os.getenv("LOCAL_PGHOST"),
+    "PORT": os.getenv("LOCAL_PGPORT"),
+}
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("PGDATABASE"),
-        "USER": os.getenv("PGUSER"),
-        "PASSWORD": os.getenv("PGPASSWORD"),
-        "HOST": os.getenv("PGHOST"),
-        "PORT": os.getenv("PGPORT"),
+    "default": LOCAL_DB if DEBUG else PROD_DB
+}
+
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
     }
 }
 
@@ -165,12 +171,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles' if not DEBUG else BASE_DIR / "frontend" / "dist"
 if not DEBUG:
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    STATIC_URL = 'staticfiles/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, "frontend", "dist")]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -205,3 +208,5 @@ def show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {
     "SHOW_TOOLBAR_CALLBACK": show_toolbar,
 }
+
+ACHIEVEMENTS_WS_URI = os.getenv("ACHIEVEMENTS_WS_URI")

@@ -1,0 +1,72 @@
+body {
+  background-color: var(--bg-color4);
+}
+
+/* Info page stuff */
+
+.info-container {
+  width: 90%;
+  max-width: 1000px;
+  border-radius: 20px;
+
+  margin: auto;
+  margin-top: 50px;
+  padding: 15px;
+  text-align: center;
+
+  background-color: #ffffff;
+}
+
+.info-title {
+  font-size: 30px;
+  font-weight: 900;
+  margin: 5px 0;
+}
+
+.info-subtitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 5px 0;
+}
+
+.info-text {
+  margin: 5px 0;
+}
+
+.info-date {
+  font-size: 10px;
+  margin-top: -5px;
+  margin-bottom: 5px;
+}
+
+.specific-container {
+  width: 300px;
+
+  padding: 5px 10px;
+  margin: 5px 10px;
+  border-radius: 20px;
+
+  background-color: var(--bg-color4);
+}
+
+.name-label {
+  font-weight: 500;
+}
+
+/* broad use classes */
+
+.user-container {
+  width: 100%;
+  gap: 10px;
+
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border: 2px solid black;
+  border-radius: 50px;
+}

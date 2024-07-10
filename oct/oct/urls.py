@@ -17,8 +17,9 @@ Including another URLconf
 from django.urls import path, include
 
 handler500 = "tournament.views.error_500"
-
 urlpatterns = [
-    path("", include("tournament.urls")),
-    path("__debug__/", include("debug_toolbar.urls"))
+    path("api/achievements/", include("achievements.urls")),
+    path("api/", include("tournament.urls")),
+    path("__debug__/", include("debug_toolbar.urls")),
+    path("", include("frontend.urls"), name='index')
 ]
